@@ -13,16 +13,19 @@ const startsWithAny = (pathname: string, routes: string[]) =>
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get("mkx_access_token")?.value ?? request.cookies.get("mkx_token")?.value;
+  const jwtAccess = request.cookies.get("mkx_access_token")?.value;
+  const operativeToken = request.cookies.get("mkx_token")?.value;
+  const sessionForProtected = jwtAccess ?? operativeToken;
   const refreshToken = request.cookies.get("mkx_refresh_token")?.value;
-  const role = request.cookies.get("mkx_role")?.value;
+  const role = request.cookies.get("mkx_role")?.value ?? "";
+
   const isProtected =
     startsWithAny(pathname, protectedRoutes) ||
     startsWithAny(pathname, adminRoutes) ||
     startsWithAny(pathname, driverRoutes) ||
     startsWithAny(pathname, pickerRoutes);
 
-  if (!token && isProtected && refreshToken) {
+  if (!jwtAccess && isProtected && refreshToken) {
     const refreshResponse = await fetch(`${authServiceUrl}/auth/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -43,11 +46,20 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  if (!token && isProtected) {
+  if (!sessionForProtected && isProtected) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (token && startsWithAny(pathname, authRoutes)) {
+  if ((jwtAccess || operativeToken) && startsWithAny(pathname, authRoutes)) {
+    if (operativeToken && role === "picker") {
+      return NextResponse.redirect(new URL("/picker", request.url));
+    }
+    if (operativeToken && role === "driver") {
+      return NextResponse.redirect(new URL("/driver", request.url));
+    }
+    if (operativeToken && role === "admin") {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    }
     return NextResponse.redirect(new URL("/", request.url));
   }
 

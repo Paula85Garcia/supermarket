@@ -46,7 +46,7 @@ export default function RegisterPage() {
       setError(result?.error?.message ?? "No se pudo registrar");
       return;
     }
-    router.push("/login?registered=1");
+    router.push("/?registered=1");
   };
 
   return (

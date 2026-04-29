@@ -8,6 +8,8 @@ interface CartItem {
   name: string;
   priceCOP: number;
   quantity: number;
+  imageUrl?: string;
+  description?: string;
 }
 
 interface CartContextValue {
@@ -46,7 +48,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (found) {
         return prev.map((item) => (item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item));
       }
-      return [...prev, { id: product.id, name: product.name, priceCOP: parseCOP(product.price), quantity: 1 }];
+      return [
+        ...prev,
+        {
+          id: product.id,
+          name: product.name,
+          priceCOP: parseCOP(product.price),
+          quantity: 1,
+          imageUrl: product.image,
+          description: product.description
+        }
+      ];
     });
   };
 

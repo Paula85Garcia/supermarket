@@ -11,7 +11,10 @@ export interface Product {
   name: string;
   price: string;
   image: string;
-  stock: "Disponible" | "Pocas unidades";
+  stock: "Disponible" | "Pocas unidades" | "Agotado";
+  description?: string;
+  /** Precio tachado en UI cuando hay promo */
+  promoOriginalCOP?: number;
 }
 
 export const categories: Category[] = [

@@ -1,16 +1,18 @@
 import { AppShell } from "../../components/app-shell";
 import { WorkerProfileCard } from "../../components/worker-profile-card";
+import { PickerHeroBanner } from "../../components/picker-hero-banner";
+import { PickerOrderQueue } from "../../components/picker-order-queue";
 
 export default function PickerPage() {
   return (
     <AppShell>
-      <section className="mt-6 rounded-2xl border border-merka-border bg-merka-surface p-5">
-        <h2 className="font-headline text-2xl font-semibold text-white">Panel de Alistamiento</h2>
-        <p className="mt-2 text-sm text-zinc-400">
-          Revisa la cola de pedidos, acepta tareas y marca ordenes listas para despacho.
-        </p>
+      <PickerHeroBanner />
+      <section className="mt-4 rounded-2xl border border-merka-border bg-merka-surface p-5">
+        <h2 className="font-headline text-xl font-semibold text-white">Panel de Alistamiento</h2>
+        <p className="mt-1 text-sm text-zinc-400">Prioriza por orden de llegada. Sin carrito: solo lineas del pedido.</p>
         <WorkerProfileCard role="picker" />
       </section>
+      <PickerOrderQueue />
     </AppShell>
   );
 }

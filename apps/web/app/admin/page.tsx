@@ -3,6 +3,7 @@ import { CloudSyncCard } from "../../components/cloud-sync-card";
 import { ImageUploader } from "../../components/image-uploader";
 import { WorkforceManager } from "../../components/workforce-manager";
 import { ProductAdminManager } from "../../components/product-admin-manager";
+import { AdminOperationalInsights } from "../../components/admin-operational-insights";
 
 export default function AdminPage() {
   return (
@@ -20,6 +21,7 @@ export default function AdminPage() {
         <ImageUploader />
       </section>
       <ProductAdminManager />
+      <AdminOperationalInsights />
       <WorkforceManager />
     </AppShell>
   );

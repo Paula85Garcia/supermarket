@@ -6,6 +6,7 @@ import { AppShell } from "../../components/app-shell";
 import { useCart } from "../../lib/cart-context";
 import { safeJson } from "../../lib/safe-json";
 import { assignDriverToOrder } from "../../lib/workforce";
+import { appendOperationalOrder, type PaymentMethod } from "../../lib/orders-operational";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -14,6 +15,11 @@ export default function CheckoutPage() {
   const [error, setError] = useState("");
   const [createdOrderId, setCreatedOrderId] = useState("");
   const [assignedDriver, setAssignedDriver] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [deliveryWindow, setDeliveryWindow] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("efectivo");
   const deliveryFee = subtotal < 20000 && subtotal > 0 ? 2000 : 0;
   const total = subtotal + deliveryFee;
 
@@ -32,6 +38,10 @@ export default function CheckoutPage() {
     setError("");
     if (!items.length) {
       setError("Tu carrito esta vacio");
+      return;
+    }
+    if (!customerName.trim() || !customerPhone.trim() || !address.trim()) {
+      setError("Completa nombre, telefono y direccion de entrega");
       return;
     }
     setIsFinishing(true);
@@ -57,6 +67,24 @@ export default function CheckoutPage() {
       return;
     }
     setCreatedOrderId(result.data.id);
+    appendOperationalOrder({
+      id: result.data.id,
+      createdAt: new Date().toISOString(),
+      customerName: customerName.trim(),
+      customerPhone: customerPhone.trim(),
+      address: address.trim(),
+      paymentMethod,
+      deliveryWindow: deliveryWindow.trim(),
+      items: items.map((item) => ({
+        productId: item.id,
+        name: item.name,
+        description: item.description ?? "",
+        imageUrl: item.imageUrl ?? "",
+        quantity: item.quantity,
+        unitPrice: item.priceCOP
+      })),
+      total
+    });
     const assignment = assignDriverToOrder(result.data.id);
     if (assignment) {
       setAssignedDriver(`${assignment.displayName} (${assignment.shift})`);
@@ -71,7 +99,57 @@ export default function CheckoutPage() {
     <AppShell>
       <section className="mt-6 rounded-2xl border border-merka-border bg-merka-surface p-5">
         <h2 className="font-headline text-2xl font-semibold text-white">Checkout</h2>
-        <p className="mt-2 text-sm text-zinc-400">Confirma direccion, pago y detalle final del pedido.</p>
+        <p className="mt-2 text-sm text-zinc-400">Confirma datos de entrega y pago. El pedido llega al panel de alistamiento y domicilio.</p>
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          <input
+            value={customerName}
+            onChange={(e) => setCustomerName(e.target.value)}
+            className="rounded-xl border border-merka-border bg-merka-black px-3 py-2 text-sm text-white outline-none"
+            placeholder="Nombre quien recibe"
+          />
+          <input
+            value={customerPhone}
+            onChange={(e) => setCustomerPhone(e.target.value)}
+            className="rounded-xl border border-merka-border bg-merka-black px-3 py-2 text-sm text-white outline-none"
+            placeholder="Telefono / WhatsApp"
+          />
+          <input
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            className="md:col-span-2 rounded-xl border border-merka-border bg-merka-black px-3 py-2 text-sm text-white outline-none"
+            placeholder="Direccion completa de entrega"
+          />
+          <input
+            value={deliveryWindow}
+            onChange={(e) => setDeliveryWindow(e.target.value)}
+            className="md:col-span-2 rounded-xl border border-merka-border bg-merka-black px-3 py-2 text-sm text-white outline-none"
+            placeholder="Ventana de entrega (ej: hoy 4-6pm)"
+          />
+          <div className="md:col-span-2">
+            <p className="mb-2 text-xs text-zinc-400">Metodo de pago</p>
+            <div className="flex flex-wrap gap-3 text-sm text-zinc-200">
+              {(
+                [
+                  ["efectivo", "Efectivo al recibir"],
+                  ["tarjeta", "Tarjeta / en linea"],
+                  ["transferencia", "Transferencia"],
+                  ["pendiente", "Por definir / cobrar en tienda"]
+                ] as const
+              ).map(([value, label]) => (
+                <label key={value} className="inline-flex cursor-pointer items-center gap-2">
+                  <input
+                    type="radio"
+                    name="pay"
+                    checked={paymentMethod === value}
+                    onChange={() => setPaymentMethod(value)}
+                    className="accent-merka-yellow"
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
         <div className="mt-4 space-y-2 rounded-xl border border-merka-border bg-merka-black p-4 text-sm text-zinc-200">
           {items.map((item) => (
             <p key={item.id}>

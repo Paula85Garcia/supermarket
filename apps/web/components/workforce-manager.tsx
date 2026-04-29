@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { loadWorkforceUsers, saveWorkforceUsers, type WorkforceRole, type WorkforceUser } from "../lib/workforce";
+import { loadWorkforceUsers, loadProfiles, saveWorkforceUsers, type WorkforceRole, type WorkforceUser } from "../lib/workforce";
 
 export function WorkforceManager() {
   const [users, setUsers] = useState<WorkforceUser[]>(() => loadWorkforceUsers());
@@ -10,6 +10,7 @@ export function WorkforceManager() {
   const [role, setRole] = useState<WorkforceRole>("driver");
 
   const activeUsers = useMemo(() => users.filter((u) => u.active), [users]);
+  const profiles = useMemo(() => loadProfiles(), [users]);
 
   const persist = (next: WorkforceUser[]) => {
     setUsers(next);
@@ -73,6 +74,10 @@ export function WorkforceManager() {
           <div key={user.id} className="flex items-center justify-between rounded-xl border border-merka-border bg-merka-black p-3 text-xs">
             <span className="text-zinc-200">
               {user.username} · {user.role}
+              {(() => {
+                const pr = profiles.find((p) => p.username === user.username);
+                return pr ? ` · ${pr.displayName} · ${pr.shift}` : "";
+              })()}
             </span>
             <button onClick={() => deactivate(user.id)} className="rounded-lg bg-merka-red px-2 py-1 text-white">
               Marcar retiro

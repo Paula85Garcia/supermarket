@@ -15,6 +15,7 @@ function LoginPageContent() {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [shift, setShift] = useState("");
+  const [shiftTime, setShiftTime] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [workforceUsers, setWorkforceUsers] = useState<WorkforceUser[]>([]);
@@ -43,7 +44,8 @@ function LoginPageContent() {
         return;
       }
       if (selectedWorkforce.role === "driver" || selectedWorkforce.role === "picker") {
-        saveProfile({ username: selectedWorkforce.username, displayName, shift });
+        const shiftParts = [shift.trim(), shiftTime ? `Hora ${shiftTime}` : ""].filter(Boolean);
+        saveProfile({ username: selectedWorkforce.username, displayName, shift: shiftParts.join(" · ") });
       }
       setClientSession(selectedWorkforce.role, selectedWorkforce.username);
       router.push(selectedWorkforce.role === "admin" ? "/admin" : selectedWorkforce.role === "driver" ? "/driver" : "/picker");
@@ -111,12 +113,14 @@ function LoginPageContent() {
               ))}
             </select>
           ) : null}
-          <input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-xl border border-merka-border bg-merka-black px-3 py-2 text-sm text-white outline-none"
-            placeholder={loginMode === "operative" ? "Usuario operativo" : "Correo"}
-          />
+          {loginMode !== "operative" ? (
+            <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full rounded-xl border border-merka-border bg-merka-black px-3 py-2 text-sm text-white outline-none"
+              placeholder="Correo"
+            />
+          ) : null}
           <input
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -135,9 +139,25 @@ function LoginPageContent() {
               <input
                 value={shift}
                 onChange={(e) => setShift(e.target.value)}
+                list="shift-presets"
                 className="w-full rounded-xl border border-merka-border bg-merka-black px-3 py-2 text-sm text-white outline-none"
-                placeholder="Horario (ej: 7:00-15:00)"
+                placeholder="Turno o horario (elige de la lista o escribe)"
               />
+              <datalist id="shift-presets">
+                <option value="Mañana 06:00-14:00" />
+                <option value="Tarde 14:00-22:00" />
+                <option value="Noche 22:00-06:00" />
+                <option value="Central 08:00-17:00" />
+              </datalist>
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-center">
+                <label className="text-xs text-zinc-500 sm:w-40">Referencia hora (opcional)</label>
+                <input
+                  type="time"
+                  value={shiftTime}
+                  onChange={(e) => setShiftTime(e.target.value)}
+                  className="w-full rounded-xl border border-merka-border bg-merka-black px-3 py-2 text-sm text-white outline-none sm:max-w-[200px]"
+                />
+              </div>
             </>
           )}
         </div>
@@ -145,18 +165,21 @@ function LoginPageContent() {
         <button
           type="submit"
           disabled={isLoading}
-          className="mt-5 w-full rounded-xl bg-merka-yellow px-4 py-2 font-semibold text-merka-black disabled:opacity-60"
+          className="mt-5 w-full rounded-xl bg-merka-yellow px-4 py-2 font-semibold text-merka-black transition hover:brightness-110 disabled:opacity-60"
         >
           {isLoading ? "Ingresando..." : "Entrar"}
         </button>
         <Link
           href="/"
-          className="mt-2 inline-flex w-full justify-center rounded-xl border border-merka-border bg-merka-surface px-4 py-2 text-sm font-semibold text-zinc-200"
+          className="mt-2 inline-flex w-full justify-center rounded-xl border border-merka-border bg-merka-surface px-4 py-2 text-sm font-semibold text-zinc-200 transition hover:border-merka-yellow hover:text-merka-yellow"
         >
           Ir al inicio
         </Link>
         <p className="mt-3 text-center text-xs text-zinc-400">
-          No tienes cuenta? <Link className="text-merka-yellow" href="/register">Registrate</Link>
+          No tienes cuenta?{" "}
+          <Link className="text-merka-yellow underline-offset-2 transition hover:underline" href="/register">
+            Registrate
+          </Link>
         </p>
       </form>
     </main>

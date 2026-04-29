@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { AppShell } from "../../../components/app-shell";
 import { ProductGrid } from "../../../components/product-grid";
-import { getCategoryBySlug, products } from "../../../lib/data";
+import { getCategoryBySlug } from "../../../lib/data";
 
 interface CategoryDetailPageProps {
   params: {
@@ -15,8 +15,6 @@ export default function CategoryDetailPage({ params }: CategoryDetailPageProps) 
     notFound();
   }
 
-  const filteredProducts = products.filter((product) => product.categorySlug === category.slug);
-
   return (
     <AppShell>
       <section className="mt-6">
@@ -25,7 +23,7 @@ export default function CategoryDetailPage({ params }: CategoryDetailPageProps) 
         </h2>
         <p className="mt-1 text-sm text-zinc-400">Productos disponibles en {category.name.toLowerCase()}.</p>
       </section>
-      <ProductGrid title={`Catalogo de ${category.name}`} products={filteredProducts} />
+      <ProductGrid title={`Catalogo de ${category.name}`} categorySlug={category.slug} />
     </AppShell>
   );
 }
