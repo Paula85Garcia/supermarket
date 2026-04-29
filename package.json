@@ -9,6 +9,7 @@
     "packages/*"
   ],
   "scripts": {
+    "build:web": "turbo run build --filter=@supermarket/web",
     "build": "turbo run build",
     "dev": "turbo run dev --parallel",
     "test": "turbo run test",
