@@ -62,7 +62,7 @@ services:
         condition: service_healthy
     volumes:
       - ./infra/docker/kafka/create-topics.sh:/tmp/create-topics.sh
-    command: ["sh", "/tmp/create-topics.sh"]
+    command: ["sh", "-c", "tr -d '\\r' < /tmp/create-topics.sh | sh"]
 
   elasticsearch:
     image: elasticsearch:8.13.0

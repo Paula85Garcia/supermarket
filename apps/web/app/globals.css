@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background: #050505;
+  color: #ffffff;
+  font-family: var(--font-urbanist), sans-serif;
+}
+
+.font-headline {
+  font-family: var(--font-poppins), sans-serif;
+}

@@ -1,12 +1,14 @@
 import { z } from "zod";
 
+const pemSchema = z.string().min(1).transform((value) => value.replace(/\\n/g, "\n"));
+
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   LOG_LEVEL: z.string().default("info"),
   PORT: z.coerce.number().int().positive().default(3001),
   DATABASE_URL: z.string().min(1),
-  JWT_PRIVATE_KEY: z.string().min(1),
-  JWT_PUBLIC_KEY: z.string().min(1),
+  JWT_PRIVATE_KEY: pemSchema,
+  JWT_PUBLIC_KEY: pemSchema,
   JWT_EXPIRES_IN: z.string().default("1h"),
   REFRESH_TOKEN_EXPIRES_IN: z.string().default("7d"),
   BCRYPT_ROUNDS: z.coerce.number().int().min(12).default(12),
