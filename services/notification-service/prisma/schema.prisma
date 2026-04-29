@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Channel {
+  whatsapp
+  push
+  sms
+  email
+}
+
+enum NotificationStatus {
+  pending
+  sent
+  failed
+}
+
+model NotificationLog {
+  id            String             @id @default(uuid())
+  eventType     String             @map("event_type")
+  channel       Channel
+  recipient     String
+  payload       Json
+  status        NotificationStatus @default(pending)
+  providerRef   String?            @map("provider_ref")
+  errorMessage  String?            @map("error_message")
+  createdAt     DateTime           @default(now()) @map("created_at")
+  updatedAt     DateTime           @updatedAt @map("updated_at")
+
+  @@index([eventType, channel])
+  @@map("notification_logs")
+}

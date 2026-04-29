@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TaskStatus {
+  assigned
+  accepted
+  ready
+  issue_reported
+}
+
+model FulfillmentTask {
+  id          String     @id @default(uuid())
+  orderId     String     @unique @map("order_id")
+  storeId     String     @map("store_id")
+  pickerId    String?    @map("picker_id")
+  status      TaskStatus @default(assigned)
+  items       Json?
+  issue       String?
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  @@index([storeId, status])
+  @@map("fulfillment_tasks")
+}

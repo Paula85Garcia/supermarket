@@ -1,0 +1,11 @@
+{
+  "name": "@supermarket/config",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tsconfig.base": "./tsconfig.base.json",
+    "./eslint.base": "./eslint.base.js",
+    "./tailwind.base": "./tailwind.base.js"
+  }
+}

@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PrismaPaymentStatus {
+  initiated
+  confirmed
+  failed
+  refunded
+}
+
+model Payment {
+  id            String             @id @default(uuid())
+  orderId       String             @map("order_id")
+  customerId    String             @map("customer_id")
+  method        String
+  status        PrismaPaymentStatus @default(initiated)
+  amount        Int
+  currency      String             @default("COP")
+  gatewayRef    String?            @map("gateway_ref")
+  gatewayToken  String?            @map("gateway_token")
+  createdAt     DateTime           @default(now()) @map("created_at")
+  updatedAt     DateTime           @updatedAt @map("updated_at")
+  refunds       Refund[]
+
+  @@index([orderId])
+  @@map("payments")
+}
+
+model Refund {
+  id          String   @id @default(uuid())
+  paymentId   String   @map("payment_id")
+  amount      Int
+  reason      String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  payment     Payment  @relation(fields: [paymentId], references: [id])
+
+  @@map("refunds")
+}
+
+model PaymentMethod {
+  id          String   @id @default(uuid())
+  customerId  String   @map("customer_id")
+  method      String
+  providerRef String?  @map("provider_ref")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("payment_methods")
+}
