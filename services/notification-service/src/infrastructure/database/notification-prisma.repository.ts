@@ -1,5 +1,6 @@
 import type { NotificationEntity } from "../../domain/entities/notification.entity.js";
 import type { NotificationRepository } from "../../domain/repositories/notification.repository.js";
+import type { Prisma } from "../../generated/prisma/index.js";
 import { prisma } from "./prisma.js";
 
 const toEntity = (row: {
@@ -25,7 +26,7 @@ export class PrismaNotificationRepository implements NotificationRepository {
         eventType: input.event_type,
         channel: input.channel,
         recipient: input.recipient,
-        payload: input.payload,
+        payload: input.payload as Prisma.InputJsonValue,
         status: input.status
       }
     });

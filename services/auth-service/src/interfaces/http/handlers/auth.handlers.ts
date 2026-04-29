@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import jwt from "jsonwebtoken";
-import type { UserPermission } from "@prisma/client";
+import type { UserPermission } from "../../../generated/prisma/index.js";
 import { prisma } from "../../../infrastructure/database/prisma.js";
 import { comparePassword, hashPassword, signAccessToken, signRefreshToken } from "../../../application/use-cases/auth.use-case.js";
 import { authForbiddenError } from "../../../infrastructure/http/errors.js";

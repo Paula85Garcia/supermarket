@@ -1,5 +1,5 @@
 import { OrderStatus } from "@supermarket/types";
-import type { PrismaOrderStatus } from "@prisma/client";
+import type { Prisma, PrismaOrderStatus } from "../../generated/prisma/index.js";
 import { prisma } from "./prisma.js";
 import type { CreateOrderInput, OrderRepository } from "../../domain/repositories/order.repository.js";
 import type { OrderEntity } from "../../domain/entities/order.entity.js";
@@ -33,7 +33,7 @@ export class PrismaOrderRepository implements OrderRepository {
         customerId: input.customerId,
         storeId: input.storeId,
         totalAmount: input.totalAmount,
-        items: input.items
+        items: input.items as unknown as Prisma.InputJsonValue
       }
     });
     return toEntity(created);

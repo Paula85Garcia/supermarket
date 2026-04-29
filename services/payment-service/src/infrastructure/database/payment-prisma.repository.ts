@@ -1,4 +1,4 @@
-import type { PrismaPaymentStatus } from "@prisma/client";
+import type { PrismaPaymentStatus } from "../../generated/prisma/index.js";
 import type { PaymentEntity } from "../../domain/entities/payment.entity.js";
 import type { InitiatePaymentInput, PaymentRepository } from "../../domain/repositories/payment.repository.js";
 import { prisma } from "./prisma.js";
