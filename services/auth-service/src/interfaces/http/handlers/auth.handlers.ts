@@ -1,5 +1,6 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import jwt from "jsonwebtoken";
+import type { UserPermission } from "@prisma/client";
 import { prisma } from "../../../infrastructure/database/prisma.js";
 import { comparePassword, hashPassword, signAccessToken, signRefreshToken } from "../../../application/use-cases/auth.use-case.js";
 import { authForbiddenError } from "../../../infrastructure/http/errors.js";
@@ -49,7 +50,7 @@ export const loginHandler = async (request: FastifyRequest, reply: FastifyReply)
     sub: user.id,
     role: user.role.name as "customer" | "admin" | "picker" | "driver" | "superadmin",
     store_id: user.storeId,
-    permissions: user.permissions.map((p) => p.permission)
+    permissions: user.permissions.map((p: UserPermission) => p.permission)
   };
   const accessToken = signAccessToken(payload);
   const refreshToken = signRefreshToken(payload);
@@ -84,7 +85,7 @@ export const refreshHandler = async (request: FastifyRequest, reply: FastifyRepl
     sub: user.id,
     role: user.role.name as "customer" | "admin" | "picker" | "driver" | "superadmin",
     store_id: user.storeId,
-    permissions: user.permissions.map((p) => p.permission)
+    permissions: user.permissions.map((p: UserPermission) => p.permission)
   };
   const accessToken = signAccessToken(payload);
   reply.send({ data: { accessToken } });
@@ -121,7 +122,7 @@ export const meHandler = async (request: FastifyRequest, reply: FastifyReply): P
       email: user.email,
       fullName: user.fullName,
       role: user.role.name,
-      permissions: user.permissions.map((p) => p.permission)
+      permissions: user.permissions.map((p: UserPermission) => p.permission)
     }
   });
 };

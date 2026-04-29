@@ -6,14 +6,14 @@ import { env } from "../../config/env.js";
 export const signAccessToken = (payload: Omit<JWTPayload, "iat" | "exp">): string => {
   return jwt.sign(payload, env.JWT_PRIVATE_KEY, {
     algorithm: "RS256",
-    expiresIn: env.JWT_EXPIRES_IN
+    expiresIn: env.JWT_EXPIRES_IN as jwt.SignOptions["expiresIn"]
   });
 };
 
 export const signRefreshToken = (payload: Pick<JWTPayload, "sub" | "role" | "store_id" | "permissions">): string => {
   return jwt.sign(payload, env.JWT_PRIVATE_KEY, {
     algorithm: "RS256",
-    expiresIn: env.REFRESH_TOKEN_EXPIRES_IN
+    expiresIn: env.REFRESH_TOKEN_EXPIRES_IN as jwt.SignOptions["expiresIn"]
   });
 };
 
