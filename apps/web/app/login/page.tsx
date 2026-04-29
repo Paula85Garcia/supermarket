@@ -1,13 +1,13 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { safeJson } from "../../lib/safe-json";
 import { setClientSession } from "../../lib/auth";
 import { loadWorkforceUsers, saveProfile, type WorkforceUser } from "../../lib/workforce";
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loginMode, setLoginMode] = useState<"user" | "operative">("user");
@@ -160,5 +160,21 @@ export default function LoginPage() {
         </p>
       </form>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center bg-merka-black px-4">
+          <div className="w-full max-w-md rounded-2xl border border-merka-border bg-merka-surface p-6 text-sm text-zinc-300">
+            Cargando login...
+          </div>
+        </main>
+      }
+    >
+      <LoginPageContent />
+    </Suspense>
   );
 }
