@@ -7,6 +7,7 @@ import { AuthError } from "./infrastructure/http/errors.js";
 export const buildApp = () => {
   const app = Fastify({ logger: { level: env.LOG_LEVEL } });
   app.register(sensible);
+  app.get("/health", async () => ({ ok: true }));
   app.register(authRoutes);
 
   app.setErrorHandler((error, _request, reply) => {

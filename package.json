@@ -10,6 +10,8 @@
   ],
   "scripts": {
     "build:web": "turbo run build --filter=@supermarket/web",
+    "build:auth": "turbo run build --filter=@supermarket/auth-service",
+    "start:auth": "node services/auth-service/dist/main.js",
     "build": "turbo run build",
     "dev": "turbo run dev --parallel",
     "test": "turbo run test",

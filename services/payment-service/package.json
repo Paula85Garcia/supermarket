@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/main.ts",
-    "build": "prisma generate && tsc -p tsconfig.json",
+    "build": "prisma generate && tsc -p tsconfig.json && node ../../scripts/copy-src-generated-to-dist.mjs",
     "start": "node dist/main.js",
     "lint": "eslint \"src/**/*.ts\"",
     "test": "vitest run",
