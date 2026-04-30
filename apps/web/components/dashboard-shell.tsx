@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getPromotionalProducts } from "../lib/catalog-merge";
 import { maybePushPromoDigestOncePerSession } from "../lib/app-notifications";
@@ -20,9 +20,11 @@ function readCookie(name: string): string {
 export function DashboardShell() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  /** Primitivo derivado: `searchParams` a veces mantiene identidad y no re-renderiza al cambiar solo ?q= */
+  const querySignature = searchParams.toString();
   const welcomeRegister = searchParams.get("registered") === "1";
   const accountDeleted = searchParams.get("account_deleted") === "1";
-  const catalogSearch = searchParams.get("q") ?? "";
+  const catalogSearch = useMemo(() => searchParams.get("q") ?? "", [querySignature, searchParams]);
 
   useEffect(() => {
     const role = readCookie("mkx_role");
@@ -60,7 +62,7 @@ export function DashboardShell() {
       <DeliveryPolicyCard />
       <OffersSection />
       <CategoriesRow />
-      <ProductGrid searchQuery={catalogSearch} />
+      <ProductGrid key={`catalog-${querySignature}`} searchQuery={catalogSearch} />
     </AppShell>
   );
 }

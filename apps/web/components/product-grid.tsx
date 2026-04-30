@@ -1,11 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { AddToCartButton } from "./add-to-cart-button";
 import { ProductImageBlock } from "./product-image-block";
-import type { Product } from "../lib/data";
+import { categories, type Product } from "../lib/data";
 import { getMergedCatalogProducts, subscribeCatalog } from "../lib/catalog-merge";
+
+function fold(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function categoryNameForProduct(p: Product): string {
+  return categories.find((c) => c.slug === p.categorySlug)?.name ?? p.categorySlug;
+}
 
 interface ProductGridProps {
   title?: string;
@@ -27,27 +38,40 @@ export function ProductGrid({ title = "Productos destacados", categorySlug, sear
     return subscribeCatalog(refresh);
   }, [categorySlug]);
 
-  const needle = searchQuery.trim().toLowerCase();
-  const visible = needle
-    ? list.filter(
-        (p) =>
-          p.name.toLowerCase().includes(needle) ||
-          (p.description ?? "").toLowerCase().includes(needle) ||
-          p.categorySlug.toLowerCase().includes(needle)
-      )
-    : list;
+  const needleRaw = searchQuery.trim();
+  const needle = fold(needleRaw);
+  const needleDigits = needleRaw.replace(/\D/g, "");
+
+  const visible = useMemo(() => {
+    const scoped = list;
+    if (!needle && (!needleDigits || needleDigits.length < 2)) return scoped;
+    return scoped.filter((p) => {
+      const priceDigits = p.price.replace(/\D/g, "");
+      const catName = fold(categoryNameForProduct(p));
+      if (needle) {
+        if (fold(p.name).includes(needle)) return true;
+        if (fold(p.description ?? "").includes(needle)) return true;
+        if (fold(p.categorySlug).includes(needle)) return true;
+        if (catName.includes(needle)) return true;
+      }
+      if (needleDigits.length >= 2 && priceDigits.includes(needleDigits)) return true;
+      return false;
+    });
+  }, [list, needle, needleDigits]);
 
   return (
     <section className="mt-8 pb-24 md:pb-8">
       <h3 className="font-headline text-lg font-semibold text-white">{title}</h3>
-      {needle ? (
+      {needle || (needleDigits.length >= 2) ? (
         <p className="mt-2 text-sm text-zinc-400">
           {visible.length} resultado{visible.length === 1 ? "" : "s"} para &quot;{searchQuery.trim()}&quot;
         </p>
       ) : null}
       <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {visible.length === 0 ? (
-          <p className="col-span-full text-sm text-zinc-500">{needle ? "No hay productos que coincidan." : "Sin productos."}</p>
+          <p className="col-span-full text-sm text-zinc-500">
+            {needle || needleDigits.length >= 2 ? "No hay productos que coincidan." : "Sin productos."}
+          </p>
         ) : null}
         {visible.map((product) => (
           <motion.article

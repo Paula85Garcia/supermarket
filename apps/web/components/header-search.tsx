@@ -17,18 +17,29 @@ export function HeaderSearch() {
     if (pathname === "/" || pathname.startsWith("/categories")) {
       setQ(searchParams.get("q") ?? "");
     }
-  }, [pathname, searchParams]);
+  }, [pathname, searchParams.toString(), searchParams]);
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
     const term = q.trim();
     if (pathname === "/" || pathname.startsWith("/categories")) {
       const base = pathname.startsWith("/categories") ? pathname.split("?")[0] : "/";
-      if (term) router.push(`${base}?q=${encodeURIComponent(term)}`);
-      else router.push(base);
+      if (term) {
+        router.push(`${base}?q=${encodeURIComponent(term)}`);
+        router.refresh();
+      } else {
+        router.push(base);
+        router.refresh();
+      }
       return;
     }
-    router.push(term ? `/?q=${encodeURIComponent(term)}` : "/");
+    if (term) {
+      router.push(`/?q=${encodeURIComponent(term)}`);
+      router.refresh();
+    } else {
+      router.push("/");
+      router.refresh();
+    }
   };
 
   return (

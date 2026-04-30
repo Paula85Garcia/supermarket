@@ -57,8 +57,6 @@ export function seedManagedProductsIfEmpty(): void {
   if (localStorage.getItem(STORAGE_KEY)) return;
   const seeded = products.map((product) => {
     const priceCOP = Number(product.price.replace(/[^\d]/g, "")) || 0;
-    const demoPromo = product.id === "p-1" || product.id === "p-8";
-    const promoPriceCOP = demoPromo ? Math.round(priceCOP * 0.88) : null;
     return {
       id: product.id,
       name: product.name,
@@ -67,8 +65,8 @@ export function seedManagedProductsIfEmpty(): void {
       priceCOP,
       imageUrl: product.image,
       status: (product.stock === "Pocas unidades" ? "out_of_stock" : "active") as ManagedProductStatus,
-      onSale: demoPromo,
-      promoPriceCOP: demoPromo ? promoPriceCOP : (null as number | null),
+      onSale: false,
+      promoPriceCOP: null as number | null,
       stockQty: null as number | null
     };
   });
@@ -123,6 +121,35 @@ function managedToProduct(m: ManagedProductRecord): Product | null {
 }
 
 export function getMergedCatalogProducts(): Product[] {
+  if (typeof window !== "undefined") {
+    try {
+      const flag = "mkx_cleared_demo_promo_seed";
+      if (!localStorage.getItem(flag)) {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const arr = JSON.parse(raw) as ManagedProductRecord[];
+            let changed = false;
+            const next = arr.map((m) => {
+              if ((m.id === "p-1" || m.id === "p-8") && m.onSale) {
+                changed = true;
+                return { ...m, onSale: false, promoPriceCOP: null };
+              }
+              return m;
+            });
+            if (changed) {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+              broadcastCatalog();
+            }
+          }
+        } finally {
+          localStorage.setItem(flag, "1");
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+  }
   seedManagedProductsIfEmpty();
   const managed = loadManagedProducts();
   const fromManaged = managed.map(managedToProduct).filter((p): p is Product => p != null);

@@ -1,6 +1,9 @@
 import { Suspense } from "react";
 import { DashboardShell } from "../components/dashboard-shell";
 
+/** Búsqueda con ?q= depende de la URL; evita caché estática que ignore query. */
+export const dynamic = "force-dynamic";
+
 export default function Page() {
   return (
     <Suspense

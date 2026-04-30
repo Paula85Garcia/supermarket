@@ -1,12 +1,14 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { ProductGrid } from "./product-grid";
 
 function CategoryCatalogInner({ categorySlug, title }: { categorySlug: string; title: string }) {
-  const q = useSearchParams().get("q") ?? "";
-  return <ProductGrid title={title} categorySlug={categorySlug} searchQuery={q} />;
+  const searchParams = useSearchParams();
+  const sig = searchParams.toString();
+  const q = useMemo(() => searchParams.get("q") ?? "", [sig, searchParams]);
+  return <ProductGrid key={`cat-grid-${sig}`} title={title} categorySlug={categorySlug} searchQuery={q} />;
 }
 
 export function CategoryCatalogSection({ categorySlug, title }: { categorySlug: string; title: string }) {
