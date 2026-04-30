@@ -7,7 +7,8 @@ interface EtaRouteProps {
 
 export async function GET(_request: Request, { params }: EtaRouteProps) {
   const accessToken = cookies().get("mkx_access_token")?.value;
-  if (!accessToken) {
+  const operativeToken = cookies().get("mkx_token")?.value;
+  if (!accessToken && !operativeToken) {
     return NextResponse.json({ error: { code: "ORD_AUTH_001", message: "Sesion expirada" } }, { status: 401 });
   }
 

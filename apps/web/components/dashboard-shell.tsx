@@ -19,6 +19,7 @@ export function DashboardShell() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const welcomeRegister = searchParams.get("registered") === "1";
+  const catalogSearch = searchParams.get("q") ?? "";
 
   useEffect(() => {
     const role = readCookie("mkx_role");
@@ -42,7 +43,7 @@ export function DashboardShell() {
       <DeliveryPolicyCard />
       <OffersSection />
       <CategoriesRow />
-      <ProductGrid />
+      <ProductGrid searchQuery={catalogSearch} />
     </AppShell>
   );
 }

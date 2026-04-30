@@ -16,7 +16,7 @@ const AUTH_REASON_COPY: Record<string, { title: string; body: string; border: st
   },
   idle_timeout: {
     title: "Inactividad",
-    body: "Por seguridad cerramos la sesión tras 1 hora sin uso. Puedes volver a entrar cuando quieras.",
+    body: "Por seguridad cerramos la sesión tras varias horas sin uso en esta cuenta. Puedes volver a entrar cuando quieras.",
     border: "border-merka-yellow/50 bg-merka-yellow/10"
   }
 };
@@ -34,6 +34,7 @@ function LoginPageContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [displayName, setDisplayName] = useState("");
   const [shift, setShift] = useState("");
+  const [pickerWhatsapp, setPickerWhatsapp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [workforceUsers, setWorkforceUsers] = useState<WorkforceUser[]>([]);
 
@@ -65,10 +66,18 @@ function LoginPageContent() {
         alertError("Para este rol indica nombre visible y turno u horario (texto).");
         return;
       }
-      if (selectedWorkforce.role === "driver" || selectedWorkforce.role === "picker") {
+      if (selectedWorkforce.role === "driver") {
         saveProfile({ username: selectedWorkforce.username, displayName, shift: shift.trim() });
       }
-      setClientSession(selectedWorkforce.role, selectedWorkforce.username);
+      if (selectedWorkforce.role === "picker") {
+        saveProfile({
+          username: selectedWorkforce.username,
+          displayName,
+          shift: shift.trim(),
+          whatsappPhone: pickerWhatsapp.trim() || undefined
+        });
+      }
+      await setClientSession(selectedWorkforce.role, selectedWorkforce.username);
       router.push(selectedWorkforce.role === "admin" ? "/admin" : selectedWorkforce.role === "driver" ? "/driver" : "/picker");
       return;
     }
@@ -200,6 +209,15 @@ function LoginPageContent() {
                 <option value="Noche 22:00-06:00" />
                 <option value="Central 08:00-17:00" />
               </datalist>
+              {selectedWorkforce?.role === "picker" ? (
+                <input
+                  value={pickerWhatsapp}
+                  onChange={(e) => setPickerWhatsapp(e.target.value)}
+                  className="w-full rounded-xl border border-merka-border bg-merka-black px-3 py-2 text-sm text-white outline-none"
+                  placeholder="WhatsApp para recibir pedidos de clientes (ej. +57 3001234567)"
+                  autoComplete="tel"
+                />
+              ) : null}
             </>
           )}
         </div>
@@ -210,13 +228,6 @@ function LoginPageContent() {
         >
           {isLoading ? "Ingresando..." : "Entrar"}
         </button>
-        <Link
-          href="/"
-          className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-merka-border bg-merka-surface px-4 py-2.5 text-sm font-semibold text-zinc-200 transition hover:border-merka-yellow hover:text-merka-yellow"
-        >
-          <Home className="h-4 w-4 text-merka-yellow" aria-hidden />
-          Ir al inicio
-        </Link>
         <p className="mt-3 text-center text-xs text-zinc-400">
           ¿No tienes cuenta?{" "}
           <Link className="text-merka-yellow underline-offset-2 transition hover:underline" href="/register">

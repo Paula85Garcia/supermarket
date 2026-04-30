@@ -11,9 +11,11 @@ interface ProductGridProps {
   title?: string;
   /** Si se indica, solo productos de esa categoria */
   categorySlug?: string;
+  /** Filtro por nombre / descripcion (desde buscador del header) */
+  searchQuery?: string;
 }
 
-export function ProductGrid({ title = "Productos destacados", categorySlug }: ProductGridProps) {
+export function ProductGrid({ title = "Productos destacados", categorySlug, searchQuery = "" }: ProductGridProps) {
   const [list, setList] = useState<Product[]>([]);
 
   useEffect(() => {
@@ -25,11 +27,29 @@ export function ProductGrid({ title = "Productos destacados", categorySlug }: Pr
     return subscribeCatalog(refresh);
   }, [categorySlug]);
 
+  const needle = searchQuery.trim().toLowerCase();
+  const visible = needle
+    ? list.filter(
+        (p) =>
+          p.name.toLowerCase().includes(needle) ||
+          (p.description ?? "").toLowerCase().includes(needle) ||
+          p.categorySlug.toLowerCase().includes(needle)
+      )
+    : list;
+
   return (
     <section className="mt-8 pb-24 md:pb-8">
       <h3 className="font-headline text-lg font-semibold text-white">{title}</h3>
+      {needle ? (
+        <p className="mt-2 text-sm text-zinc-400">
+          {visible.length} resultado{visible.length === 1 ? "" : "s"} para &quot;{searchQuery.trim()}&quot;
+        </p>
+      ) : null}
       <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {list.map((product) => (
+        {visible.length === 0 ? (
+          <p className="col-span-full text-sm text-zinc-500">{needle ? "No hay productos que coincidan." : "Sin productos."}</p>
+        ) : null}
+        {visible.map((product) => (
           <motion.article
             key={product.id}
             whileHover={{ scale: 1.03 }}

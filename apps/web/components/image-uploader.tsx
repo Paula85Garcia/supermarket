@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Upload } from "lucide-react";
 
 export function ImageUploader() {
-  const [status, setStatus] = useState<string>("Selecciona una imagen");
+    const [status, setStatus] = useState<string>("Elige una imagen desde tu dispositivo");
   const [url, setUrl] = useState<string>("");
 
   const onFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,11 +34,11 @@ export function ImageUploader() {
     <section className="mt-4 rounded-2xl border border-merka-border bg-merka-surface p-4">
       <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-merka-yellow px-4 py-2 text-sm font-semibold text-merka-black">
         <Upload size={16} />
-        Subir foto a Cloudinary
+        Subir foto de producto
         <input type="file" accept="image/*" onChange={onFileChange} className="hidden" />
       </label>
       <p className="mt-2 text-xs text-zinc-400">{status}</p>
-      {url ? <p className="mt-1 truncate text-xs text-merka-green">{url}</p> : null}
+      {url ? <p className="mt-1 text-xs text-merka-green">Imagen cargada correctamente.</p> : null}
     </section>
   );
 }

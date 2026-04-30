@@ -74,6 +74,8 @@ CLOUDINARY_API_KEY=tu_api_key
 CLOUDINARY_API_SECRET=tu_api_secret
 NEXT_PUBLIC_USER_ROLE=admin
 AUTH_SERVICE_URL=http://localhost:3001
+# WhatsApp del alistamiento (solo dígitos / +57). Si los pickers guardan su número al entrar, tiene prioridad.
+NEXT_PUBLIC_MERKAMAX_PICKER_WA=573001234567
 ```
 
 Cloud name usado por el upload route:

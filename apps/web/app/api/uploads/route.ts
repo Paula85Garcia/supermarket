@@ -40,7 +40,7 @@ export async function POST(request: Request) {
 
   if (!response.ok || !result.secure_url) {
     return NextResponse.json(
-      { error: { code: "UPL_003", message: result.error?.message ?? "Error subiendo a Cloudinary" } },
+      { error: { code: "UPL_003", message: result.error?.message ?? "Error al guardar la imagen" } },
       { status: 500 }
     );
   }

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { AppShell } from "../../../components/app-shell";
 import { CategoryIcon } from "../../../components/category-icon";
-import { ProductGrid } from "../../../components/product-grid";
+import { CategoryCatalogSection } from "../../../components/category-catalog-section";
 import { getCategoryBySlug } from "../../../lib/data";
 
 interface CategoryDetailPageProps {
@@ -25,7 +25,7 @@ export default function CategoryDetailPage({ params }: CategoryDetailPageProps) 
         </h2>
         <p className="mt-1 text-sm text-zinc-400">Productos disponibles en {category.name.toLowerCase()}.</p>
       </section>
-      <ProductGrid title={`Catalogo de ${category.name}`} categorySlug={category.slug} />
+      <CategoryCatalogSection title={`Catalogo de ${category.name}`} categorySlug={category.slug} />
     </AppShell>
   );
 }

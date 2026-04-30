@@ -9,7 +9,7 @@ export default function PickerPage() {
       <PickerHeroBanner />
       <section className="mt-4 rounded-2xl border border-merka-border bg-merka-surface p-5">
         <h2 className="font-headline text-xl font-semibold text-white">Panel de Alistamiento</h2>
-        <p className="mt-1 text-sm text-zinc-400">Prioriza por orden de llegada. Sin carrito: solo lineas del pedido.</p>
+        <p className="mt-1 text-sm text-zinc-400">Prioriza por orden de llegada.</p>
         <WorkerProfileCard role="picker" />
       </section>
       <PickerOrderQueue />

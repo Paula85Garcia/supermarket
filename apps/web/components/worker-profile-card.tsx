@@ -16,6 +16,7 @@ function readCookie(name: string): string {
 export function WorkerProfileCard({ role }: WorkerProfileCardProps) {
   const [name, setName] = useState("");
   const [shift, setShift] = useState("");
+  const [wa, setWa] = useState("");
 
   useEffect(() => {
     const identifier = readCookie("mkx_identifier");
@@ -24,6 +25,7 @@ export function WorkerProfileCard({ role }: WorkerProfileCardProps) {
     if (!profile) return;
     setName(profile.displayName);
     setShift(profile.shift);
+    setWa(profile.whatsappPhone?.trim() ?? "");
   }, []);
 
   return (
@@ -31,6 +33,11 @@ export function WorkerProfileCard({ role }: WorkerProfileCardProps) {
       <p className="text-xs text-zinc-400">Rol activo: {role === "driver" ? "Domiciliario" : "Alistamiento"}</p>
       <p className="mt-1 text-sm text-white">Nombre en turno: {name || "Sin configurar en login"}</p>
       <p className="mt-1 text-sm text-zinc-300">Horario: {shift || "Sin configurar en login"}</p>
+      {role === "picker" ? (
+        <p className="mt-1 text-xs text-zinc-400">
+          WhatsApp para clientes: {wa ? <span className="text-merka-yellow">{wa}</span> : <span className="text-zinc-500">Añádelo al iniciar sesión</span>}
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const protectedRoutes = ["/orders", "/account", "/checkout"];
+/** Checkout y carrito pueden usarse sin cuenta (invitado con carrito). */
+const protectedRoutes = ["/orders", "/account"];
 const adminRoutes = ["/admin"];
 const driverRoutes = ["/driver"];
 const pickerRoutes = ["/picker"];

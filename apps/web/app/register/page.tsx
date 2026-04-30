@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Eye, EyeOff, Home } from "lucide-react";
 import { safeJson } from "../../lib/safe-json";
+import { saveCustomerLocalProfile } from "../../lib/customer-local-profile";
 
 function alertError(message: string): void {
   window.alert(message);
@@ -19,6 +20,7 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [homeAddress, setHomeAddress] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -29,6 +31,10 @@ export default function RegisterPage() {
     }
     if (!whatsappPhone.trim()) {
       alertError("El número de WhatsApp es obligatorio.");
+      return;
+    }
+    if (!homeAddress.trim()) {
+      alertError("La dirección de entrega es obligatoria.");
       return;
     }
     if (password !== confirmPassword) {
@@ -55,6 +61,12 @@ export default function RegisterPage() {
         alertError(result?.error?.message ?? "No se pudo completar el registro. Intenta de nuevo.");
         return;
       }
+      saveCustomerLocalProfile({
+        fullName: fullName.trim(),
+        email: email.trim(),
+        whatsappPhone: whatsappPhone.trim(),
+        homeAddress: homeAddress.trim()
+      });
       router.push("/?registered=1");
     } catch {
       alertError("No hubo conexión con el servidor. Comprueba tu red e intenta de nuevo.");
@@ -110,6 +122,14 @@ export default function RegisterPage() {
             className="w-full rounded-xl border border-merka-border bg-merka-black px-3 py-2 text-sm text-white outline-none"
             placeholder="WhatsApp (ej. +57 3001234567)"
             autoComplete="tel"
+          />
+          <textarea
+            value={homeAddress}
+            onChange={(e) => setHomeAddress(e.target.value)}
+            rows={3}
+            className="w-full resize-y rounded-xl border border-merka-border bg-merka-black px-3 py-2 text-sm text-white outline-none"
+            placeholder="Dirección de entrega (barrio, calle, número, referencia)"
+            autoComplete="street-address"
           />
           <div className="relative">
             <input

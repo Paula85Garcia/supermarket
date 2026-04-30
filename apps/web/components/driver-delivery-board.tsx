@@ -64,7 +64,7 @@ export function DriverDeliveryBoard() {
           <span className="rounded-full bg-merka-red px-3 py-1 text-xs font-bold text-white">{pendingReady} listos</span>
         ) : null}
       </div>
-      <p className="mt-1 text-xs text-zinc-400">Avanza el estado de ruta con el boton amarillo. Colores: amarillo en camino, ambar en puerta, verde entregado.</p>
+      <p className="mt-1 text-xs text-zinc-400">Estado de ruta: amarillo en camino, ámbar en puerta, verde entregado.</p>
       <div className="mt-4 space-y-4">
         {orders.length === 0 ? <p className="text-sm text-zinc-500">No hay entregas pendientes.</p> : null}
         {orders.map((order) => {

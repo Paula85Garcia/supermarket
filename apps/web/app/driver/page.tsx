@@ -7,7 +7,7 @@ export default function DriverPage() {
     <AppShell>
       <section className="mt-6 rounded-2xl border border-merka-border bg-merka-surface p-5">
         <h2 className="font-headline text-2xl font-semibold text-white">Panel Domiciliario</h2>
-        <p className="mt-2 text-sm text-zinc-400">Entregas, pago y confirmacion con alistamiento. La campanita en la barra muestra pedidos listos.</p>
+        <p className="mt-2 text-sm text-zinc-400">Entregas y pago. La campana indica pedidos listos.</p>
         <WorkerProfileCard role="driver" />
       </section>
       <DriverDeliveryBoard />

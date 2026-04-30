@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { AppShell } from "../../components/app-shell";
 import { useCart } from "../../lib/cart-context";
+import { buildCartWaText, getPickerWhatsappDigits, openWhatsAppToDigits } from "../../lib/picker-whatsapp";
 
 export default function CartPage() {
   const { items, subtotal, removeItem } = useCart();
@@ -10,13 +11,8 @@ export default function CartPage() {
   const total = subtotal + deliveryFee;
   const whatsappSummary = () => {
     const lines = items.map((item) => `- ${item.name} x${item.quantity} ($${(item.priceCOP * item.quantity).toLocaleString("es-CO")})`);
-    const message =
-      `Hola equipo de domicilios MERKAMAX.%0A` +
-      `Resumen compra:%0A${lines.join("%0A")}%0A` +
-      `Subtotal: $${subtotal.toLocaleString("es-CO")}%0A` +
-      `Recargo domicilio: $${deliveryFee.toLocaleString("es-CO")}%0A` +
-      `Total: $${total.toLocaleString("es-CO")}`;
-    window.open(`https://wa.me/573053700491?text=${message}`, "_blank", "noopener,noreferrer");
+    const text = buildCartWaText({ lines, subtotal, deliveryFee, total });
+    openWhatsAppToDigits(getPickerWhatsappDigits(), text);
   };
 
   return (
@@ -35,7 +31,7 @@ export default function CartPage() {
                     {item.quantity} x ${item.priceCOP.toLocaleString("es-CO")}
                   </p>
                 </div>
-                <button onClick={() => removeItem(item.id)} className="rounded-lg bg-merka-red px-3 py-1 text-xs text-white">
+                <button type="button" onClick={() => removeItem(item.id)} className="rounded-lg bg-merka-red px-3 py-1 text-xs text-white">
                   Quitar
                 </button>
               </div>
@@ -49,8 +45,8 @@ export default function CartPage() {
               <Link href="/checkout" className="inline-flex rounded-xl bg-merka-yellow px-4 py-2 text-sm font-semibold text-merka-black">
                 Ir a checkout
               </Link>
-              <button onClick={whatsappSummary} className="inline-flex rounded-xl bg-merka-green px-4 py-2 text-sm font-semibold text-white">
-                Ir directo a WhatsApp
+              <button type="button" onClick={whatsappSummary} className="inline-flex rounded-xl bg-merka-green px-4 py-2 text-sm font-semibold text-white">
+                WhatsApp alistamiento
               </button>
             </div>
           </div>

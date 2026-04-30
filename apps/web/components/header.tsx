@@ -1,20 +1,21 @@
 "use client";
 
 import Link from "next/link";
+import { Suspense } from "react";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Bell, ClipboardList, LogOut, Search, ShoppingCart, Truck, UserCircle2 } from "lucide-react";
+import { Bell, ClipboardList, LogOut, ShoppingCart, Truck, UserCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { fetchWithAutoRefresh } from "../lib/fetch-with-auth";
 import { useCart } from "../lib/cart-context";
 import { loadOperationalOrders, subscribeOperationalOrders } from "../lib/orders-operational";
 import { getProfile } from "../lib/workforce";
 import { FreeShippingProgress } from "./free-shipping-progress";
+import { HeaderSearch } from "./header-search";
 
 const hoverBtn = "rounded-xl border border-merka-border bg-merka-surface p-2.5 text-zinc-300 transition hover:border-merka-yellow hover:bg-merka-yellow/10 hover:text-merka-yellow";
 const hoverLink = "rounded-xl border border-merka-border bg-merka-surface px-3 py-2 text-xs text-zinc-300 transition hover:border-merka-yellow hover:bg-merka-yellow/10 hover:text-merka-yellow";
-const hoverSearch = "flex w-full items-center gap-3 rounded-2xl border border-merka-border bg-merka-surface px-4 py-3 transition hover:border-merka-yellow/60 hover:shadow-[0_0_0_1px_rgba(255,215,0,0.12)] md:max-w-2xl";
 
 export function Header() {
   const router = useRouter();
@@ -89,15 +90,13 @@ export function Header() {
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         {showSearch ? (
           <div className="flex w-full flex-col gap-2 md:max-w-2xl">
-            <div className={hoverSearch}>
-              <Search className="shrink-0 text-zinc-400" size={18} />
-              <input
-                type="text"
-                placeholder="Preguntale a Max o busca un producto..."
-                className="w-full bg-transparent text-sm text-white outline-none placeholder:text-zinc-500"
-              />
-              <span className="shrink-0 rounded-full bg-merka-yellow px-3 py-1 text-xs font-semibold text-black">IA</span>
-            </div>
+            <Suspense
+              fallback={
+                <div className="h-[52px] w-full animate-pulse rounded-2xl border border-merka-border bg-merka-surface md:max-w-2xl" />
+              }
+            >
+              <HeaderSearch />
+            </Suspense>
             {showFreeShipping ? <FreeShippingProgress variant="compact" /> : null}
           </div>
         ) : (
