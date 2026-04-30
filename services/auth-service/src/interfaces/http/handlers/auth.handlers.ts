@@ -2,9 +2,24 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import jwt from "jsonwebtoken";
 import type { UserPermission } from "../../../generated/prisma/index.js";
 import { prisma } from "../../../infrastructure/database/prisma.js";
-import { comparePassword, hashPassword, signAccessToken, signRefreshToken } from "../../../application/use-cases/auth.use-case.js";
+import {
+  comparePassword,
+  hashPassword,
+  signAccessToken,
+  signPasswordResetToken,
+  signRefreshToken,
+  verifyPasswordResetToken
+} from "../../../application/use-cases/auth.use-case.js";
 import { authForbiddenError } from "../../../infrastructure/http/errors.js";
-import { createAdminUserSchema, loginSchema, refreshSchema, registerSchema } from "../schemas/auth.schemas.js";
+import {
+  createAdminUserSchema,
+  deleteAccountSchema,
+  loginSchema,
+  passwordResetConfirmSchema,
+  passwordResetRequestSchema,
+  refreshSchema,
+  registerSchema
+} from "../schemas/auth.schemas.js";
 
 const roleNameByInput: Record<string, string> = {
   customer: "customer",
@@ -22,9 +37,10 @@ export const registerHandler = async (request: FastifyRequest, reply: FastifyRep
     return;
   }
   const passwordHash = await hashPassword(body.password);
+  const emailNorm = body.email.toLowerCase();
   const user = await prisma.user.create({
     data: {
-      email: body.email,
+      email: emailNorm,
       passwordHash,
       fullName: body.fullName,
       storeId: body.storeId,
@@ -38,10 +54,10 @@ export const registerHandler = async (request: FastifyRequest, reply: FastifyRep
 export const loginHandler = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
   const body = loginSchema.parse(request.body);
   const user = await prisma.user.findUnique({
-    where: { email: body.email },
+    where: { email: body.email.toLowerCase() },
     include: { role: true, permissions: true }
   });
-  if (!user || !(await comparePassword(body.password, user.passwordHash))) {
+  if (!user || !user.isActive || !(await comparePassword(body.password, user.passwordHash))) {
     reply.code(401).send({ error: { code: "AUTH_001", message: "Credenciales invalidas" } });
     return;
   }
@@ -76,7 +92,7 @@ export const refreshHandler = async (request: FastifyRequest, reply: FastifyRepl
     where: { id: decoded.sub },
     include: { role: true, permissions: true }
   });
-  if (!user) {
+  if (!user || !user.isActive) {
     reply.code(401).send({ error: { code: "AUTH_001", message: "Usuario invalido" } });
     return;
   }
@@ -112,7 +128,7 @@ export const meHandler = async (request: FastifyRequest, reply: FastifyReply): P
     where: { id: userId },
     include: { role: true, permissions: true }
   });
-  if (!user) {
+  if (!user || !user.isActive) {
     reply.code(404).send({ error: { code: "AUTH_003", message: "Usuario no encontrado" } });
     return;
   }
@@ -125,6 +141,70 @@ export const meHandler = async (request: FastifyRequest, reply: FastifyReply): P
       permissions: user.permissions.map((p: UserPermission) => p.permission)
     }
   });
+};
+
+/** Respuesta uniforme para no filtrar si el correo existe (en producción el token solo va por email). */
+export const passwordResetRequestHandler = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+  const body = passwordResetRequestSchema.parse(request.body);
+  const user = await prisma.user.findUnique({ where: { email: body.email.toLowerCase() } });
+  const base = { ok: true as const, message: "Si el correo esta registrado, recibiras un enlace para restablecer la contrasena." };
+
+  if (!user || !user.isActive) {
+    reply.send({ data: base });
+    return;
+  }
+
+  const resetToken = signPasswordResetToken(user.id);
+  const exposeToken = process.env.NODE_ENV !== "production";
+  reply.send({
+    data: exposeToken ? { ...base, resetToken } : base
+  });
+};
+
+export const passwordResetConfirmHandler = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+  const body = passwordResetConfirmSchema.parse(request.body);
+  const decoded = verifyPasswordResetToken(body.token);
+  if (!decoded) {
+    reply.code(400).send({ error: { code: "AUTH_010", message: "Enlace invalido o vencido" } });
+    return;
+  }
+  const user = await prisma.user.findUnique({ where: { id: decoded.sub } });
+  if (!user || !user.isActive) {
+    reply.code(400).send({ error: { code: "AUTH_010", message: "Enlace invalido o vencido" } });
+    return;
+  }
+  const passwordHash = await hashPassword(body.newPassword);
+  await prisma.$transaction([
+    prisma.refreshToken.deleteMany({ where: { userId: user.id } }),
+    prisma.user.update({ where: { id: user.id }, data: { passwordHash } })
+  ]);
+  reply.send({ data: { success: true } });
+};
+
+/** Solo cuentas con rol customer (compradores). */
+export const deleteAccountHandler = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+  const userId = (request.user as { sub: string }).sub;
+  const body = deleteAccountSchema.parse(request.body);
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { role: true }
+  });
+  if (!user || !user.isActive) {
+    reply.code(404).send({ error: { code: "AUTH_003", message: "Usuario no encontrado" } });
+    return;
+  }
+  if (user.role.name !== "customer") {
+    reply.code(403).send({
+      error: { code: "AUTH_011", message: "Esta cuenta no se puede eliminar desde aqui. Contacta soporte." }
+    });
+    return;
+  }
+  if (!(await comparePassword(body.password, user.passwordHash))) {
+    reply.code(401).send({ error: { code: "AUTH_012", message: "Contrasena incorrecta" } });
+    return;
+  }
+  await prisma.user.delete({ where: { id: user.id } });
+  reply.send({ data: { deleted: true } });
 };
 
 export const createAdminUserHandler = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {

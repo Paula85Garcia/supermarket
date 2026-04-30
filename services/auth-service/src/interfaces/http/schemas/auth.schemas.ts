@@ -24,3 +24,16 @@ export const createAdminUserSchema = z.object({
   storeId: z.string().min(1),
   permissions: z.array(z.string()).default([])
 });
+
+export const passwordResetRequestSchema = z.object({
+  email: z.string().email()
+});
+
+export const passwordResetConfirmSchema = z.object({
+  token: z.string().min(1),
+  newPassword: z.string().min(8)
+});
+
+export const deleteAccountSchema = z.object({
+  password: z.string().min(8)
+});

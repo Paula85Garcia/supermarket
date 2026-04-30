@@ -24,3 +24,26 @@ export const hashPassword = async (password: string): Promise<string> => {
 export const comparePassword = async (password: string, hash: string): Promise<boolean> => {
   return bcrypt.compare(password, hash);
 };
+
+const PASSWORD_RESET_PURPOSE = "password_reset" as const;
+
+export const signPasswordResetToken = (userId: string): string => {
+  return jwt.sign({ sub: userId, purpose: PASSWORD_RESET_PURPOSE }, env.JWT_PRIVATE_KEY, {
+    algorithm: "RS256",
+    expiresIn: "1h"
+  });
+};
+
+export const verifyPasswordResetToken = (token: string): { sub: string } | null => {
+  try {
+    const decoded = jwt.verify(token, env.JWT_PUBLIC_KEY, {
+      algorithms: ["RS256"]
+    }) as jwt.JwtPayload & { purpose?: string; sub?: string };
+    if (decoded.purpose !== PASSWORD_RESET_PURPOSE || typeof decoded.sub !== "string") {
+      return null;
+    }
+    return { sub: decoded.sub };
+  } catch {
+    return null;
+  }
+};

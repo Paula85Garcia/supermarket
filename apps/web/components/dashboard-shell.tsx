@@ -19,6 +19,7 @@ export function DashboardShell() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const welcomeRegister = searchParams.get("registered") === "1";
+  const accountDeleted = searchParams.get("account_deleted") === "1";
   const catalogSearch = searchParams.get("q") ?? "";
 
   useEffect(() => {
@@ -37,6 +38,15 @@ export function DashboardShell() {
         >
           <span className="font-semibold text-merka-green">Cuenta creada.</span> Ya puedes armar tu pedido; revisa
           categorías y ofertas abajo.
+        </div>
+      ) : null}
+      {accountDeleted ? (
+        <div
+          className="mb-4 rounded-2xl border border-merka-yellow/50 bg-merka-yellow/10 px-4 py-3 text-sm text-zinc-100"
+          role="status"
+        >
+          <span className="font-semibold text-merka-yellow">Cuenta eliminada.</span> Tu sesión en el servidor ya no
+          existe. Puedes volver a registrarte cuando quieras.
         </div>
       ) : null}
       <HeroBanner />

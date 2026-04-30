@@ -205,6 +205,10 @@ export default function RegisterPage() {
           <Link className="text-merka-yellow underline-offset-2 hover:underline" href="/login">
             Inicia sesión
           </Link>
+          {" · "}
+          <Link className="text-zinc-400 underline-offset-2 hover:text-merka-yellow hover:underline" href="/forgot-password">
+            Olvidé mi contraseña
+          </Link>
         </p>
       </form>
     </main>

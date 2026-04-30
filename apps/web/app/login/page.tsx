@@ -18,6 +18,11 @@ const AUTH_REASON_COPY: Record<string, { title: string; body: string; border: st
     title: "Inactividad",
     body: "Por seguridad cerramos la sesión tras varias horas sin uso en esta cuenta. Puedes volver a entrar cuando quieras.",
     border: "border-merka-yellow/50 bg-merka-yellow/10"
+  },
+  password_reset_ok: {
+    title: "Contraseña actualizada",
+    body: "Ya puedes iniciar sesión con tu nueva contraseña.",
+    border: "border-merka-green/50 bg-merka-green/10"
   }
 };
 
@@ -228,7 +233,14 @@ function LoginPageContent() {
         >
           {isLoading ? "Ingresando..." : "Entrar"}
         </button>
-        <p className="mt-3 text-center text-xs text-zinc-400">
+        {loginMode === "user" ? (
+          <p className="mt-3 text-center text-xs">
+            <Link href="/forgot-password" className="text-merka-yellow underline-offset-2 hover:underline">
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </p>
+        ) : null}
+        <p className={`text-center text-xs text-zinc-400 ${loginMode === "user" ? "mt-2" : "mt-3"}`}>
           ¿No tienes cuenta?{" "}
           <Link className="text-merka-yellow underline-offset-2 transition hover:underline" href="/register">
             Regístrate

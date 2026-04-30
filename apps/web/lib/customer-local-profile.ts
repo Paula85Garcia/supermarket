@@ -32,3 +32,12 @@ export function saveCustomerLocalProfile(profile: CustomerLocalProfile): void {
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
 }
+
+export function clearCustomerLocalProfile(): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
