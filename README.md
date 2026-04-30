@@ -2,6 +2,12 @@
 
 Plataforma de supermercado, logistica y delivery con arquitectura de microservicios.
 
+## Despliegue (Vercel)
+
+- **Dashboard web (producción):** [https://supermarket-auth-service-ug3h.vercel.app/](https://supermarket-auth-service-ug3h.vercel.app/)
+
+> Asegúrate de que las variables de entorno en Vercel (`AUTH_SERVICE_URL`, Cloudinary, etc.) coincidan con tu backend desplegado.
+
 ## Stack principal
 
 - Monorepo: Turborepo + npm workspaces

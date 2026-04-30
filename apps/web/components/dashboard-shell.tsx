@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AppShell } from "./app-shell";
 import { HeroBanner } from "./hero-banner";
 import { CategoriesRow } from "./categories-row";
@@ -17,6 +17,9 @@ function readCookie(name: string): string {
 
 export function DashboardShell() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const welcomeRegister = searchParams.get("registered") === "1";
+
   useEffect(() => {
     const role = readCookie("mkx_role");
     const op = readCookie("mkx_token");
@@ -26,6 +29,15 @@ export function DashboardShell() {
 
   return (
     <AppShell>
+      {welcomeRegister ? (
+        <div
+          className="mb-4 rounded-2xl border border-merka-green/50 bg-merka-green/10 px-4 py-3 text-sm text-zinc-100"
+          role="status"
+        >
+          <span className="font-semibold text-merka-green">Cuenta creada.</span> Ya puedes armar tu pedido; revisa
+          categorías y ofertas abajo.
+        </div>
+      ) : null}
       <HeroBanner />
       <DeliveryPolicyCard />
       <OffersSection />

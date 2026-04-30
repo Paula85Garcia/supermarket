@@ -4,6 +4,7 @@ import { ImageUploader } from "../../components/image-uploader";
 import { WorkforceManager } from "../../components/workforce-manager";
 import { ProductAdminManager } from "../../components/product-admin-manager";
 import { AdminOperationalInsights } from "../../components/admin-operational-insights";
+import { AdminDashboardQuick } from "../../components/admin-dashboard-quick";
 
 export default function AdminPage() {
   return (
@@ -12,6 +13,7 @@ export default function AdminPage() {
         <h2 className="font-headline text-2xl font-semibold text-white">Panel Admin</h2>
         <p className="mt-1 text-sm text-zinc-400">Gestion de productos, inventario y publicaciones del catalogo.</p>
       </section>
+      <AdminDashboardQuick />
       <section className="mt-4 rounded-2xl border border-merka-border bg-merka-surface p-5">
         <h3 className="font-headline text-lg font-semibold text-white">Crear productos</h3>
         <p className="mt-1 text-sm text-zinc-400">

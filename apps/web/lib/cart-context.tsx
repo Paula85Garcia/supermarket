@@ -19,6 +19,8 @@ interface CartContextValue {
   clearCart: () => void;
   totalItems: number;
   subtotal: number;
+  /** Se incrementa al agregar (rebote del carrito en header) */
+  cartBumpKey: number;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -27,6 +29,7 @@ const parseCOP = (value: string): number => Number(value.replace(/[^\d]/g, "")) 
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [cartBumpKey, setCartBumpKey] = useState(0);
 
   useEffect(() => {
     const raw = localStorage.getItem("mkx_cart");
@@ -43,6 +46,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [items]);
 
   const addItem = (product: Product) => {
+    setCartBumpKey((k) => k + 1);
     setItems((prev) => {
       const found = prev.find((item) => item.id === product.id);
       if (found) {
@@ -76,7 +80,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const subtotal = useMemo(() => items.reduce((acc, item) => acc + item.priceCOP * item.quantity, 0), [items]);
 
   return (
-    <CartContext.Provider value={{ items, addItem, removeItem, clearCart, totalItems, subtotal }}>
+    <CartContext.Provider value={{ items, addItem, removeItem, clearCart, totalItems, subtotal, cartBumpKey }}>
       {children}
     </CartContext.Provider>
   );

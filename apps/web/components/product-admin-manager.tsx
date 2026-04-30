@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import { categories } from "../lib/data";
+import { categories, MERKAMAX_PRODUCT_PLACEHOLDER_IMAGE } from "../lib/data";
 import {
   loadManagedProducts,
   saveManagedProducts,
@@ -56,7 +56,7 @@ export function ProductAdminManager() {
     if (form.onSale && (!promo || promo <= 0 || promo >= price)) return;
     const stockQtyParsed = form.stockQty.trim() === "" ? null : Number(form.stockQty);
     if (stockQtyParsed !== null && (!Number.isFinite(stockQtyParsed) || stockQtyParsed < 0)) return;
-    const imageUrl = form.imageUrl.trim() || "https://res.cloudinary.com/dky2dscgr/image/upload/v1711111111/merkamax/leche.jpg";
+    const imageUrl = form.imageUrl.trim() || MERKAMAX_PRODUCT_PLACEHOLDER_IMAGE;
 
     if (editingId) {
       persist(

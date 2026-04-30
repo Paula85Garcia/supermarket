@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { usePathname } from "next/navigation";
 import { Sidebar } from "./sidebar";
 import { Header } from "./header";
 import { ChatbotWidget } from "./chatbot-widget";
@@ -18,7 +19,15 @@ function readCookie(name: string): string {
   return match ? decodeURIComponent(match[2]) : "";
 }
 
+function hideChatbotForPath(pathname: string): boolean {
+  if (pathname === "/driver" || pathname === "/picker") return true;
+  if (pathname.startsWith("/driver/") || pathname.startsWith("/picker/")) return true;
+  return false;
+}
+
 export function AppShell({ children }: AppShellProps) {
+  const pathname = usePathname();
+
   useEffect(() => {
     const id = readCookie("mkx_identifier");
     const role = readCookie("mkx_role");
@@ -34,16 +43,21 @@ export function AppShell({ children }: AppShellProps) {
   return (
     <div className="min-h-screen bg-merka-black">
       <Sidebar />
-      <motion.main
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35 }}
-        className="mx-auto w-full max-w-7xl px-4 pb-28 pt-4 md:pl-28 md:pr-8 md:pt-8"
-      >
-        <Header />
-        {children}
-      </motion.main>
-      <ChatbotWidget />
+      <main className="mx-auto w-full max-w-7xl px-4 pb-28 pt-4 md:pl-28 md:pr-8 md:pt-8">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={pathname}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <Header />
+            {children}
+          </motion.div>
+        </AnimatePresence>
+      </main>
+      {!hideChatbotForPath(pathname) ? <ChatbotWidget /> : null}
     </div>
   );
 }

@@ -1,7 +1,13 @@
 "use client";
 
 import { CartProvider } from "../lib/cart-context";
+import { SessionActivityManager } from "../lib/session-activity";
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  return <CartProvider>{children}</CartProvider>;
+  return (
+    <CartProvider>
+      <SessionActivityManager />
+      {children}
+    </CartProvider>
+  );
 }

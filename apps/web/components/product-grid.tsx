@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { AddToCartButton } from "./add-to-cart-button";
+import { ProductImageBlock } from "./product-image-block";
 import type { Product } from "../lib/data";
 import { getMergedCatalogProducts, subscribeCatalog } from "../lib/catalog-merge";
 
@@ -33,14 +34,9 @@ export function ProductGrid({ title = "Productos destacados", categorySlug }: Pr
             key={product.id}
             whileHover={{ scale: 1.03 }}
             transition={{ type: "spring", stiffness: 280, damping: 22 }}
-            className="rounded-2xl border border-merka-border bg-merka-surface p-4 hover:shadow-glow"
+            className="rounded-2xl border border-merka-border bg-merka-surface p-4 shadow-none transition-shadow duration-300 hover:shadow-card"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={product.image}
-              alt=""
-              className="mb-4 h-40 w-full rounded-xl border border-merka-border object-cover"
-            />
+            <ProductImageBlock src={product.image} alt={product.name} />
             <h4 className="font-headline text-base font-medium text-white">{product.name}</h4>
             {product.description ? <p className="mt-1 line-clamp-2 text-xs text-zinc-400">{product.description}</p> : null}
             <div className="mt-1 flex flex-wrap items-baseline gap-2">

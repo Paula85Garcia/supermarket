@@ -8,6 +8,10 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "res.cloudinary.com"
+      },
+      {
+        protocol: "https",
+        hostname: "tse3.mm.bing.net"
       }
     ]
   }

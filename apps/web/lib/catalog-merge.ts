@@ -1,6 +1,6 @@
 "use client";
 
-import { categories, products, type Product } from "./data";
+import { categories, products, type Product, MERKAMAX_PRODUCT_PLACEHOLDER_IMAGE } from "./data";
 
 const STORAGE_KEY = "mkx_managed_products";
 const CHANNEL = "mkx_catalog";
@@ -50,23 +50,28 @@ export interface ManagedProductRecord {
   stockQty: number | null;
 }
 
-const defaultImage = "https://res.cloudinary.com/dky2dscgr/image/upload/v1711111111/merkamax/leche.jpg";
+const defaultImage = MERKAMAX_PRODUCT_PLACEHOLDER_IMAGE;
 
 export function seedManagedProductsIfEmpty(): void {
   if (typeof window === "undefined") return;
   if (localStorage.getItem(STORAGE_KEY)) return;
-  const seeded = products.map((product) => ({
-    id: product.id,
-    name: product.name,
-    description: `Producto ${product.name}`,
-    categorySlug: product.categorySlug,
-    priceCOP: Number(product.price.replace(/[^\d]/g, "")) || 0,
-    imageUrl: product.image,
-    status: (product.stock === "Pocas unidades" ? "out_of_stock" : "active") as ManagedProductStatus,
-    onSale: false,
-    promoPriceCOP: null as number | null,
-    stockQty: null as number | null
-  }));
+  const seeded = products.map((product) => {
+    const priceCOP = Number(product.price.replace(/[^\d]/g, "")) || 0;
+    const demoPromo = product.id === "p-1" || product.id === "p-8";
+    const promoPriceCOP = demoPromo ? Math.round(priceCOP * 0.88) : null;
+    return {
+      id: product.id,
+      name: product.name,
+      description: `Producto ${product.name}`,
+      categorySlug: product.categorySlug,
+      priceCOP,
+      imageUrl: product.image,
+      status: (product.stock === "Pocas unidades" ? "out_of_stock" : "active") as ManagedProductStatus,
+      onSale: demoPromo,
+      promoPriceCOP: demoPromo ? promoPriceCOP : (null as number | null),
+      stockQty: null as number | null
+    };
+  });
   localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded));
   broadcastCatalog();
 }
@@ -126,6 +131,13 @@ export function getMergedCatalogProducts(): Product[] {
   const withDesc = rest.map((p) => ({ ...p, description: `Producto ${p.name}` }));
   if (!fromManaged.length) return withDesc;
   return [...fromManaged, ...withDesc.filter((p) => !managedIds.has(p.id))];
+}
+
+/** Productos con precio promocional (admin o catálogo base con `promoOriginalCOP`). */
+export function getPromotionalProducts(): Product[] {
+  return getMergedCatalogProducts().filter(
+    (p) => typeof p.promoOriginalCOP === "number" && p.promoOriginalCOP > 0
+  );
 }
 
 export { categories };

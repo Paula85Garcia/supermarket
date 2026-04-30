@@ -51,7 +51,7 @@ export default function TrackOrderPage({ params }: TrackPageProps) {
       <section className="mt-6 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
         <div className="rounded-2xl border border-merka-border bg-merka-surface p-4">
           <h2 className="font-headline text-xl font-semibold text-white">Tracking pedido #{params.id}</h2>
-          <p className="mt-1 text-sm text-zinc-400">Ubicacion en tiempo real del domiciliario y ruta de entrega.</p>
+          <p className="mt-1 text-sm text-zinc-400">Mapa orientativo y seguimiento del pedido en ruta.</p>
           {driverName ? (
             <p className="mt-1 text-xs text-merka-yellow">Tu pedido lo lleva: {driverName} · {driverShift}</p>
           ) : null}

@@ -6,5 +6,6 @@ export async function POST() {
   response.cookies.set("mkx_refresh_token", "", { path: "/", maxAge: 0 });
   response.cookies.set("mkx_role", "", { path: "/", maxAge: 0 });
   response.cookies.set("mkx_token", "", { path: "/", maxAge: 0 });
+  response.cookies.set("mkx_identifier", "", { path: "/", maxAge: 0 });
   return response;
 }

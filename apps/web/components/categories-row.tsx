@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { categories } from "../lib/data";
+import { CategoryIcon } from "./category-icon";
 
 export function CategoriesRow() {
   return (
@@ -19,9 +20,9 @@ export function CategoriesRow() {
           >
             <Link
               href={`/categories/${category.slug}`}
-              className="inline-flex min-w-fit items-center gap-2 rounded-full border border-merka-border bg-merka-surface px-4 py-2 text-sm text-zinc-200 transition hover:bg-merka-yellow hover:text-merka-black"
+              className="inline-flex min-w-fit items-center gap-2 rounded-full border border-merka-border bg-merka-surface px-4 py-2 text-sm text-zinc-200 transition hover:border-merka-yellow hover:bg-merka-yellow/10 hover:text-merka-yellow"
             >
-              <span>{category.emoji}</span>
+              <CategoryIcon slug={category.slug} className="h-4 w-4 text-merka-yellow" />
               {category.name}
             </Link>
           </motion.div>

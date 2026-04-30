@@ -9,7 +9,11 @@ export interface OperationalLineItem {
   imageUrl: string;
   quantity: number;
   unitPrice: number;
+  /** Marcado por el picker al alistar */
+  picked?: boolean;
 }
+
+export type DriverRouteStatus = "en_camino" | "en_puerta" | "entregado";
 
 export interface OperationalOrder {
   id: string;
@@ -25,6 +29,8 @@ export interface OperationalOrder {
   driverReceivedCash: boolean;
   driverPaidPicker: boolean;
   pickerConfirmedDriverPayment: boolean;
+  /** Ruta del domiciliario (solo en reparto) */
+  driverRouteStatus?: DriverRouteStatus;
 }
 
 const STORAGE_KEY = "mkx_operational_orders";
@@ -76,7 +82,8 @@ export function appendOperationalOrder(order: Omit<OperationalOrder, "status" | 
     status: "new",
     driverReceivedCash: settledOnline,
     driverPaidPicker: settledOnline,
-    pickerConfirmedDriverPayment: settledOnline
+    pickerConfirmedDriverPayment: settledOnline,
+    items: order.items.map((line) => ({ ...line, picked: line.picked ?? false }))
   };
   saveOperationalOrders([full, ...prev]);
 }
@@ -86,8 +93,45 @@ export function updateOperationalOrder(id: string, patch: Partial<OperationalOrd
   saveOperationalOrders(prev.map((o) => (o.id === id ? { ...o, ...patch } : o)));
 }
 
+export function toggleOperationalLinePicked(orderId: string, lineIndex: number): void {
+  const prev = loadOperationalOrders();
+  saveOperationalOrders(
+    prev.map((o) => {
+      if (o.id !== orderId) return o;
+      const items = o.items.map((line, i) => (i === lineIndex ? { ...line, picked: !line.picked } : line));
+      return { ...o, items };
+    })
+  );
+}
+
+export function advanceDriverRouteStatus(orderId: string): void {
+  const o = getOperationalOrder(orderId);
+  if (!o || o.status !== "delivering") return;
+  const seq: DriverRouteStatus[] = ["en_camino", "en_puerta", "entregado"];
+  const cur = o.driverRouteStatus ?? "en_camino";
+  const idx = seq.indexOf(cur);
+  const next = idx < 0 ? "en_puerta" : seq[Math.min(idx + 1, seq.length - 1)]!;
+  updateOperationalOrder(orderId, { driverRouteStatus: next });
+}
+
 export function getOperationalOrder(id: string): OperationalOrder | undefined {
   return loadOperationalOrders().find((o) => o.id === id);
+}
+
+export function aggregateSalesToday(): { count: number; revenue: number } {
+  const orders = loadOperationalOrders();
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  const t0 = start.getTime();
+  let count = 0;
+  let revenue = 0;
+  for (const o of orders) {
+    if (new Date(o.createdAt).getTime() >= t0) {
+      count += 1;
+      revenue += o.total;
+    }
+  }
+  return { count, revenue };
 }
 
 export function aggregateSales(): { totalOrders: number; byProduct: { name: string; qty: number }[] } {
