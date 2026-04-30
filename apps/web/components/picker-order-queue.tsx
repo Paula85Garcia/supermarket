@@ -10,11 +10,23 @@ import {
   updateOperationalOrder,
   type OperationalOrder
 } from "../lib/orders-operational";
+import { subscribePickerCartSummary } from "../lib/picker-cart-broadcast";
 
-const btnYellow = "rounded-xl bg-merka-yellow px-3 py-2 text-xs font-semibold text-black transition hover:brightness-110 active:scale-[0.98]";
+const btnYellow =
+  "cursor-pointer rounded-xl bg-merka-yellow px-3 py-2 text-xs font-semibold text-black shadow-sm transition hover:brightness-110 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-white/40";
+
+type IncomingSummary = { id: string; text: string; at: number };
 
 export function PickerOrderQueue() {
   const [orders, setOrders] = useState<OperationalOrder[]>([]);
+  const [incomingSummaries, setIncomingSummaries] = useState<IncomingSummary[]>([]);
+
+  useEffect(() => {
+    return subscribePickerCartSummary((msg) => {
+      const id = `s-${msg.at}`;
+      setIncomingSummaries((prev) => [{ id, text: msg.text, at: msg.at }, ...prev].slice(0, 8));
+    });
+  }, []);
 
   useEffect(() => {
     const refresh = () => {
@@ -33,14 +45,54 @@ export function PickerOrderQueue() {
   return (
     <section className="mt-6 rounded-2xl border border-merka-border bg-merka-surface p-5">
       <h3 className="font-headline text-lg font-semibold text-white">Pedidos entrantes</h3>
-      <p className="mt-1 text-xs text-zinc-400">Marca cada producto al tomarlo del estante. Orden de llegada.</p>
+      <p className="mt-1 text-xs text-zinc-400">
+        Marca cada producto al tomarlo del estante. Pasa el cursor sobre el número de pedido para ver la lista completa.
+      </p>
+      {incomingSummaries.length > 0 ? (
+        <div className="mt-3 space-y-2">
+          {incomingSummaries.map((s) => (
+            <div
+              key={s.id}
+              className="group relative rounded-xl border border-merka-yellow/50 bg-merka-yellow/10 px-3 py-2 text-xs text-zinc-100"
+              title="Resumen enviado desde catálogo (Max o WhatsApp) en otra pestaña del mismo navegador"
+            >
+              <p className="font-semibold text-merka-yellow">Resumen reciente (cliente)</p>
+              <pre className="mt-1 max-h-32 overflow-auto whitespace-pre-wrap font-sans text-[11px] leading-relaxed text-zinc-200">
+                {s.text}
+              </pre>
+              <button
+                type="button"
+                onClick={() => setIncomingSummaries((prev) => prev.filter((x) => x.id !== s.id))}
+                className="mt-2 cursor-pointer text-[10px] font-semibold text-merka-yellow underline-offset-2 hover:underline"
+              >
+                Cerrar
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : null}
       <div className="mt-4 space-y-4">
         {orders.length === 0 ? <p className="text-sm text-zinc-500">No hay pedidos en cola.</p> : null}
         {orders.map((order) => (
           <article key={order.id} className="rounded-xl border border-merka-border bg-black p-4">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div>
-                <p className="font-headline text-sm font-semibold text-white">Pedido #{order.id}</p>
+                <p
+                  className="font-headline text-sm font-semibold text-white underline decoration-dotted decoration-zinc-500 underline-offset-2"
+                  title={[
+                    `Cliente: ${order.customerName}`,
+                    `Tel: ${order.customerPhone}`,
+                    `Dir: ${order.address}`,
+                    "",
+                    ...order.items.map(
+                      (li) => `${li.name} x${li.quantity} @ $${li.unitPrice.toLocaleString("es-CO")} = $${(li.unitPrice * li.quantity).toLocaleString("es-CO")}`
+                    ),
+                    "",
+                    `Total pedido: $${order.total.toLocaleString("es-CO")}`
+                  ].join("\n")}
+                >
+                  Pedido #{order.id}
+                </p>
                 <p className="text-xs text-zinc-400">{new Date(order.createdAt).toLocaleString("es-CO")}</p>
                 <p className="mt-2 text-sm text-zinc-200">
                   Cliente: {order.customerName} · Tel: {order.customerPhone}
@@ -54,12 +106,12 @@ export function PickerOrderQueue() {
               </div>
               <div className="flex flex-wrap gap-2">
                 {order.status === "new" ? (
-                  <button type="button" onClick={() => setPicking(order.id)} className={btnYellow}>
+                  <button type="button" onClick={() => setPicking(order.id)} className={btnYellow} title="Marcar en alistamiento">
                     Iniciar alistamiento
                   </button>
                 ) : null}
                 {order.status === "picking" ? (
-                  <button type="button" onClick={() => setReady(order.id)} className={btnYellow}>
+                  <button type="button" onClick={() => setReady(order.id)} className={btnYellow} title="Pedido empacado, espera domiciliario">
                     Listo para despacho
                   </button>
                 ) : null}
@@ -68,7 +120,7 @@ export function PickerOrderQueue() {
                   <button
                     type="button"
                     onClick={() => updateOperationalOrder(order.id, { pickerConfirmedDriverPayment: true })}
-                    className="rounded-xl border border-merka-green px-3 py-2 text-xs font-semibold text-merka-green transition hover:bg-merka-green/10"
+                    className="cursor-pointer rounded-xl border border-merka-green px-3 py-2 text-xs font-semibold text-merka-green transition hover:bg-merka-green/10 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-merka-green/40"
                   >
                     Confirmar pago del domiciliario
                   </button>

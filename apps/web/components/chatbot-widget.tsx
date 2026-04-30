@@ -5,6 +5,7 @@ import { MessageCircle, Send, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { getDriverChatCustomerPhone, subscribeDriverChatCustomerPhone } from "../lib/driver-chat-target";
 import { buildCartWaText, getPickerWhatsappDigits, openWhatsAppToDigits } from "../lib/picker-whatsapp";
+import { broadcastPickerCartSummary } from "../lib/picker-cart-broadcast";
 import { useCart } from "../lib/cart-context";
 
 type CustomerChannel = "whatsapp" | "max";
@@ -31,7 +32,7 @@ export function ChatbotWidget() {
   const [message, setMessage] = useState("");
   const [driverPhone, setDriverPhone] = useState<string | null>(null);
   const [customerChannel, setCustomerChannel] = useState<CustomerChannel>("whatsapp");
-  const [maxThread, setMaxThread] = useState<{ role: "user" | "max"; text: string }[]>([]);
+  const [maxThread, setMaxThread] = useState<{ role: "user" | "max" | "summary"; text: string }[]>([]);
   const threadEndRef = useRef<HTMLDivElement>(null);
   const { items, subtotal } = useCart();
 
@@ -66,6 +67,9 @@ export function ChatbotWidget() {
       (items.length
         ? buildCartWaText({ lines, subtotal, deliveryFee, total })
         : "Hola, equipo de alistamiento MERKAMAX. Tengo una consulta sobre mi pedido.");
+    if (items.length) {
+      broadcastPickerCartSummary(buildCartWaText({ lines, subtotal, deliveryFee, total }));
+    }
     sendWhatsApp(text);
   };
 
@@ -75,7 +79,18 @@ export function ChatbotWidget() {
     setMaxThread((prev) => [...prev, { role: "user", text }]);
     setMessage("");
     window.setTimeout(() => {
-      setMaxThread((prev) => [...prev, { role: "max", text: maxReply(text) }]);
+      const reply = maxReply(text);
+      setMaxThread((prev) => [...prev, { role: "max", text: reply }]);
+      if (items.length) {
+        const deliveryFee = subtotal < 20000 && subtotal > 0 ? 2000 : 0;
+        const total = subtotal + deliveryFee;
+        const lines = items.map(
+          (item) => `- ${item.name} x${item.quantity} ($${(item.priceCOP * item.quantity).toLocaleString("es-CO")})`
+        );
+        const summary = buildCartWaText({ lines, subtotal, deliveryFee, total });
+        setMaxThread((prev) => [...prev, { role: "summary", text: summary }]);
+        broadcastPickerCartSummary(summary);
+      }
     }, 450);
   };
 
@@ -159,9 +174,18 @@ export function ChatbotWidget() {
                       maxThread.map((m, i) => (
                         <p
                           key={`${i}-${m.role}`}
-                          className={`mb-2 rounded-lg px-2 py-1.5 ${m.role === "user" ? "ml-4 bg-zinc-800 text-zinc-100" : "mr-4 bg-merka-green/20 text-zinc-200"}`}
+                          className={`mb-2 whitespace-pre-wrap rounded-lg px-2 py-1.5 ${
+                            m.role === "user"
+                              ? "ml-4 bg-zinc-800 text-zinc-100"
+                              : m.role === "summary"
+                                ? "mx-1 border border-merka-yellow/40 bg-merka-yellow/10 text-zinc-100"
+                                : "mr-4 bg-merka-green/20 text-zinc-200"
+                          }`}
                         >
-                          <span className="font-semibold text-merka-yellow">{m.role === "user" ? "Tú" : "Max"}:</span> {m.text}
+                          <span className="font-semibold text-merka-yellow">
+                            {m.role === "user" ? "Tú" : m.role === "summary" ? "Resumen carrito" : "Max"}
+                          </span>{" "}
+                          {m.text}
                         </p>
                       ))
                     )}

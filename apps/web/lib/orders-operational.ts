@@ -1,5 +1,7 @@
 "use client";
 
+import { notifyOrderDelivered } from "./app-notifications";
+
 export type PaymentMethod = "efectivo" | "tarjeta" | "transferencia" | "pendiente";
 
 export interface OperationalLineItem {
@@ -90,7 +92,13 @@ export function appendOperationalOrder(order: Omit<OperationalOrder, "status" | 
 
 export function updateOperationalOrder(id: string, patch: Partial<OperationalOrder>): void {
   const prev = loadOperationalOrders();
-  saveOperationalOrders(prev.map((o) => (o.id === id ? { ...o, ...patch } : o)));
+  const old = prev.find((o) => o.id === id);
+  const next = prev.map((o) => (o.id === id ? { ...o, ...patch } : o));
+  saveOperationalOrders(next);
+  const updated = next.find((o) => o.id === id);
+  if (updated?.status === "done" && old?.status !== "done") {
+    notifyOrderDelivered(updated.id);
+  }
 }
 
 export function toggleOperationalLinePicked(orderId: string, lineIndex: number): void {

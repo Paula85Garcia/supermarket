@@ -65,7 +65,11 @@ export function WorkforceManager() {
           <option value="picker">Alistamiento</option>
           <option value="admin">Admin</option>
         </select>
-        <button onClick={addUser} className="rounded-xl bg-merka-yellow px-3 py-2 text-xs font-semibold text-merka-black">
+        <button
+          type="button"
+          onClick={addUser}
+          className="cursor-pointer rounded-xl bg-merka-yellow px-3 py-2 text-xs font-semibold text-merka-black shadow-sm transition hover:brightness-110 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-white/40"
+        >
           Crear usuario
         </button>
       </div>
@@ -79,7 +83,11 @@ export function WorkforceManager() {
                 return pr ? ` · ${pr.displayName} · ${pr.shift}` : "";
               })()}
             </span>
-            <button onClick={() => deactivate(user.id)} className="rounded-lg bg-merka-red px-2 py-1 text-white">
+            <button
+              type="button"
+              onClick={() => deactivate(user.id)}
+              className="cursor-pointer rounded-lg bg-merka-red px-2 py-1 text-white shadow-sm transition hover:brightness-110 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-merka-red/50"
+            >
               Marcar retiro
             </button>
           </div>

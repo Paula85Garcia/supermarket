@@ -1,7 +1,8 @@
 import { createHash } from "crypto";
 import { NextResponse } from "next/server";
 
-const cloudName = "dky2dscgr";
+const cloudName =
+  process.env.CLOUDINARY_CLOUD_NAME ?? process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? "dky2dscgr";
 
 export async function POST(request: Request) {
   const form = await request.formData();

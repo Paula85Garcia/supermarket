@@ -5,14 +5,16 @@ import { Suspense } from "react";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Bell, ClipboardList, LogOut, ShoppingCart, Truck, UserCircle2 } from "lucide-react";
+import { ClipboardList, LogOut, ShoppingCart, Truck, UserCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { fetchWithAutoRefresh } from "../lib/fetch-with-auth";
 import { useCart } from "../lib/cart-context";
 import { loadOperationalOrders, subscribeOperationalOrders } from "../lib/orders-operational";
+import { scanAndNotifyDelayedOrders } from "../lib/app-notifications";
 import { getProfile } from "../lib/workforce";
 import { FreeShippingProgress } from "./free-shipping-progress";
 import { HeaderSearch } from "./header-search";
+import { NotificationBell } from "./notification-bell";
 
 const hoverBtn = "rounded-xl border border-merka-border bg-merka-surface p-2.5 text-zinc-300 transition hover:border-merka-yellow hover:bg-merka-yellow/10 hover:text-merka-yellow";
 const hoverLink = "rounded-xl border border-merka-border bg-merka-surface px-3 py-2 text-xs text-zinc-300 transition hover:border-merka-yellow hover:bg-merka-yellow/10 hover:text-merka-yellow";
@@ -60,6 +62,17 @@ export function Header() {
     tick();
     return subscribeOperationalOrders(tick);
   }, [isDriver]);
+
+  useEffect(() => {
+    const run = () => scanAndNotifyDelayedOrders(loadOperationalOrders());
+    run();
+    const t = window.setInterval(run, 60_000);
+    const unsub = subscribeOperationalOrders(run);
+    return () => {
+      window.clearInterval(t);
+      unsub();
+    };
+  }, []);
 
   useEffect(() => {
     if (!isDriver && !isPicker) {
@@ -131,14 +144,7 @@ export function Header() {
           <Link href="/about" className={hoverLink}>
             Sobre nosotros
           </Link>
-          <button type="button" className={`relative ${hoverBtn}`} aria-label="Notificaciones">
-            <Bell size={18} />
-            {isDriver && readyForDriver > 0 ? (
-              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-merka-red px-1 text-[9px] font-bold text-white">
-                {readyForDriver > 9 ? "9+" : readyForDriver}
-              </span>
-            ) : null}
-          </button>
+          <NotificationBell extraBadgeCount={isDriver && readyForDriver > 0 ? readyForDriver : 0} />
           <Link href="/login" className={hoverBtn} title="Iniciar sesion">
             <UserCircle2 size={18} />
           </Link>

@@ -2,6 +2,8 @@
 
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { getPromotionalProducts } from "../lib/catalog-merge";
+import { maybePushPromoDigestOncePerSession } from "../lib/app-notifications";
 import { AppShell } from "./app-shell";
 import { HeroBanner } from "./hero-banner";
 import { CategoriesRow } from "./categories-row";
@@ -28,6 +30,11 @@ export function DashboardShell() {
     if (op && role === "picker") router.replace("/picker");
     if (op && role === "driver") router.replace("/driver");
   }, [router]);
+
+  useEffect(() => {
+    const promoCount = getPromotionalProducts().length;
+    maybePushPromoDigestOncePerSession(promoCount);
+  }, []);
 
   return (
     <AppShell>

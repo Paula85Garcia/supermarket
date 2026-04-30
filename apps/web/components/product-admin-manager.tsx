@@ -14,6 +14,25 @@ function alertMsg(message: string): void {
   window.alert(message);
 }
 
+function categoryLabel(slug: string): string {
+  return categories.find((c) => c.slug === slug)?.name ?? slug;
+}
+
+const adminBtnPrimary =
+  "cursor-pointer rounded-xl bg-merka-yellow px-3 py-2 text-xs font-semibold text-merka-black shadow-sm transition hover:brightness-110 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-white/40";
+const adminBtnGhost =
+  "cursor-pointer rounded-xl border border-merka-border px-3 py-2 text-xs text-zinc-200 transition hover:border-merka-yellow hover:bg-merka-yellow/10 hover:text-white active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-merka-yellow/30";
+const adminBtnDanger =
+  "cursor-pointer rounded-lg bg-merka-red px-2 py-1 text-[11px] text-white shadow-sm transition hover:brightness-110 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-merka-red/50";
+const adminBtnMuted =
+  "cursor-pointer rounded-lg bg-zinc-700 px-2 py-1 text-[11px] text-white transition hover:bg-zinc-600 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-zinc-500/40";
+const adminBtnSuccess =
+  "cursor-pointer rounded-lg bg-merka-green px-2 py-1 text-[11px] text-white shadow-sm transition hover:brightness-110 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-merka-green/40";
+const adminBtnOutline =
+  "cursor-pointer rounded-lg border border-merka-border px-2 py-1 text-[11px] text-zinc-200 transition hover:border-merka-yellow hover:bg-merka-yellow/10 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-merka-yellow/30";
+const adminBtnYellowSm =
+  "cursor-pointer rounded-lg bg-merka-yellow px-2 py-1 text-[11px] font-semibold text-merka-black shadow-sm transition hover:brightness-110 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-white/30";
+
 export function ProductAdminManager() {
   const [items, setItems] = useState<ManagedProductRecord[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -177,7 +196,17 @@ export function ProductAdminManager() {
   return (
     <section className="mt-5 rounded-2xl border border-merka-border bg-merka-surface p-5">
       <h3 className="font-headline text-lg font-semibold text-white">Crear y gestionar productos</h3>
-      <p className="mt-1 text-xs text-zinc-400">Nombre, precio, categoría. Foto desde tu equipo. Opcional: promoción y stock.</p>
+      <p className="mt-1 text-xs text-zinc-400">
+        Cada producto pertenece a una <span className="font-semibold text-zinc-200">categoría del catálogo</span> (selector
+        abajo). Nombre, precio, foto desde tu equipo. Opcional: promoción y stock.
+      </p>
+      <p className="mt-2 rounded-lg border border-merka-border bg-merka-black/50 px-3 py-2 text-[11px] leading-relaxed text-zinc-500">
+        <span className="font-semibold text-zinc-300">Cloudinary:</span> define{" "}
+        <code className="text-merka-yellow">CLOUDINARY_API_KEY</code> y{" "}
+        <code className="text-merka-yellow">CLOUDINARY_API_SECRET</code> en el entorno de la app web (por ejemplo{" "}
+        <code className="text-zinc-400">apps/web/.env.local</code>). Opcional:{" "}
+        <code className="text-merka-yellow">CLOUDINARY_CLOUD_NAME</code> si no usas el nombre por defecto del proyecto.
+      </p>
 
       <div className="mt-4 grid gap-2 md:grid-cols-2 lg:grid-cols-3">
         <input
@@ -199,7 +228,7 @@ export function ProductAdminManager() {
             type="button"
             disabled={uploading}
             onClick={() => fileInputRef.current?.click()}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-merka-yellow px-3 py-2 text-xs font-semibold text-merka-black disabled:opacity-50"
+            className={`${adminBtnPrimary} inline-flex items-center justify-center gap-2 disabled:opacity-50`}
           >
             <ImagePlus className="h-4 w-4" aria-hidden />
             {uploading ? "Subiendo…" : form.imageUrl ? "Cambiar foto" : "Elegir foto"}
@@ -213,7 +242,8 @@ export function ProductAdminManager() {
         <select
           value={form.categorySlug}
           onChange={(e) => setForm((prev) => ({ ...prev, categorySlug: e.target.value }))}
-          className="rounded-xl border border-merka-border bg-merka-black px-3 py-2 text-xs text-white outline-none"
+          title="Categoría del catálogo donde aparecerá el producto"
+          className="cursor-pointer rounded-xl border border-merka-border bg-merka-black px-3 py-2 text-xs text-white outline-none transition hover:border-merka-yellow/50"
         >
           {categories.map((category) => (
             <option key={category.id} value={category.slug}>
@@ -256,11 +286,11 @@ export function ProductAdminManager() {
       </div>
 
       <div className="mt-3 flex flex-wrap gap-2">
-        <button type="button" onClick={submit} className="rounded-xl bg-merka-yellow px-3 py-2 text-xs font-semibold text-merka-black">
+        <button type="button" onClick={submit} className={adminBtnPrimary}>
           {editingId ? "Guardar cambios" : "Crear producto"}
         </button>
         {editingId ? (
-          <button type="button" onClick={resetForm} className="rounded-xl border border-merka-border px-3 py-2 text-xs text-zinc-200">
+          <button type="button" onClick={resetForm} className={adminBtnGhost}>
             Cancelar edición
           </button>
         ) : null}
@@ -287,7 +317,15 @@ export function ProductAdminManager() {
               }}
             />
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-white">{item.name}</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-sm font-semibold text-white">{item.name}</p>
+                <span
+                  className="rounded-full border border-merka-yellow/40 bg-merka-yellow/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-merka-yellow"
+                  title="Categoría en el catálogo"
+                >
+                  {categoryLabel(item.categorySlug)}
+                </span>
+              </div>
               <p className="mt-1 text-xs text-zinc-400">{item.description}</p>
               <p className="mt-1 text-xs text-zinc-300">
                 {item.onSale && item.promoPriceCOP ? (
@@ -298,24 +336,24 @@ export function ProductAdminManager() {
                 ) : (
                   <>${item.priceCOP.toLocaleString("es-CO")}</>
                 )}{" "}
-                · {item.categorySlug} · {item.status}
+                · <span className="text-zinc-500">{item.status}</span>
                 {item.stockQty != null ? ` · ${item.stockQty} uds.` : ""}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={() => startEdit(item)} className="rounded-lg bg-merka-yellow px-2 py-1 text-[11px] font-semibold text-merka-black">
+              <button type="button" onClick={() => startEdit(item)} className={adminBtnYellowSm} title="Editar producto">
                 Editar
               </button>
-              <button type="button" onClick={() => setStatus(item.id, "out_of_stock")} className="rounded-lg bg-merka-red px-2 py-1 text-[11px] text-white">
+              <button type="button" onClick={() => setStatus(item.id, "out_of_stock")} className={adminBtnDanger} title="Marcar sin stock">
                 Agotado
               </button>
-              <button type="button" onClick={() => setStatus(item.id, "inactive")} className="rounded-lg bg-zinc-700 px-2 py-1 text-[11px] text-white">
+              <button type="button" onClick={() => setStatus(item.id, "inactive")} className={adminBtnMuted} title="Ocultar del catálogo">
                 Desactivar
               </button>
-              <button type="button" onClick={() => setStatus(item.id, "active")} className="rounded-lg bg-merka-green px-2 py-1 text-[11px] text-white">
+              <button type="button" onClick={() => setStatus(item.id, "active")} className={adminBtnSuccess} title="Visible en catálogo">
                 Activar
               </button>
-              <button type="button" onClick={() => remove(item.id)} className="rounded-lg border border-merka-border px-2 py-1 text-[11px] text-zinc-200">
+              <button type="button" onClick={() => remove(item.id)} className={adminBtnOutline} title="Quitar del catálogo admin">
                 Eliminar
               </button>
             </div>
